@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="700.0" prefWidth="880.0" spacing="18.0" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BillingFormController">
+   <padding>
+      <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+   </padding>
+   <children>
+      <Label styleClass="page-title" text="Billing" />
+
+      <VBox spacing="14.0" styleClass="card">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="16.0" />
+         </padding>
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="120.0" text="Appointment No" />
+                  <JFXTextField fx:id="appointmentNoTxt" prefWidth="150.0" promptText="APT0001" styleClass="txt" />
+                  <JFXButton fx:id="findBtn" onAction="#findBtnOnAction" styleClass="btn, btn-primary" text="Find" />
+               </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="120.0" text="Patient" />
+                  <Label fx:id="patientNameLbl" prefWidth="220.0" />
+                  <Label styleClass="field-label" prefWidth="100.0" text="Dentist" />
+                  <Label fx:id="dentistNameLbl" prefWidth="220.0" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="120.0" text="Treatment" />
+                  <Label fx:id="treatmentLbl" prefWidth="220.0" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="120.0" text="Consultation Fee" />
+                  <Label fx:id="consultationFeeLbl" prefWidth="150.0" />
+                  <Label styleClass="field-label" prefWidth="100.0" text="Treatment Cost" />
+                  <Label fx:id="treatmentCostLbl" prefWidth="150.0" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="120.0" text="Discount" />
+                  <JFXTextField fx:id="discountTxt" onKeyReleased="#discountTxtOnKeyReleased" prefWidth="120.0" styleClass="txt" />
+                  <Label styleClass="field-label" prefWidth="100.0" text="Total" />
+                  <Label fx:id="totalLbl" styleClass="section-title" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="120.0" text="Payment Method" />
+                  <JFXComboBox fx:id="paymentMethodComboBox" prefWidth="150.0" />
+                  <JFXButton fx:id="issueBillBtn" onAction="#issueBillBtnOnAction" styleClass="btn, btn-success" text="Issue Bill" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <Label styleClass="section-title" text="Receipt" />
+      <TextArea fx:id="receiptArea" editable="false" style="-fx-font-family: 'Consolas';" styleClass="card" VBox.vgrow="ALWAYS" />
+   </children>
+</VBox>

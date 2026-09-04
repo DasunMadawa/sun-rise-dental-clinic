@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXRadioButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="700.0" prefWidth="1000.0" spacing="14.0" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.PatientsFormController">
+   <padding>
+      <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+   </padding>
+   <children>
+      <Label styleClass="page-title" text="Patients" />
+      <Label styleClass="muted" text="Click a row to load it below, or search by Patient Id." />
+
+      <TableView fx:id="table" VBox.vgrow="ALWAYS">
+        <columns>
+          <TableColumn fx:id="patientIdCol" prefWidth="80.0" text="Patient Id" />
+          <TableColumn fx:id="nameCol" prefWidth="130.0" text="Name" />
+          <TableColumn fx:id="contactCol" prefWidth="100.0" text="Contact" />
+          <TableColumn fx:id="ageCol" prefWidth="50.0" text="Age" />
+          <TableColumn fx:id="genderCol" prefWidth="80.0" text="Gender" />
+          <TableColumn fx:id="appointmentNoCol" prefWidth="100.0" text="Latest Apt" />
+          <TableColumn fx:id="dentistCol" prefWidth="110.0" text="Dentist" />
+          <TableColumn fx:id="treatmentCol" prefWidth="100.0" text="Treatment" />
+          <TableColumn fx:id="dateCol" prefWidth="100.0" text="Date" />
+          <TableColumn fx:id="statusCol" prefWidth="90.0" text="Status" />
+        </columns>
+      </TableView>
+
+      <VBox spacing="12.0" styleClass="card">
+         <padding>
+            <Insets bottom="16.0" left="20.0" right="20.0" top="16.0" />
+         </padding>
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Patient Id" />
+                  <JFXTextField fx:id="searchTxt" onAction="#searchTxtOnAction" prefWidth="150.0" promptText="PAT0001" styleClass="txt" />
+                  <JFXButton fx:id="searchBtn" onAction="#searchBtnOnAction" styleClass="btn, btn-primary" text="Search" />
+               </children>
+            </HBox>
+            <JFXTextField fx:id="patientIdTxt" managed="false" visible="false" />
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Name" />
+                  <JFXTextField fx:id="nameTxt" prefWidth="220.0" styleClass="txt" />
+                  <Label styleClass="field-label" prefWidth="90.0" text="Contact No" />
+                  <JFXTextField fx:id="contactTxt" prefWidth="150.0" styleClass="txt" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Address" />
+                  <JFXTextField fx:id="addressTxt" prefWidth="220.0" styleClass="txt" />
+                  <Label styleClass="field-label" prefWidth="90.0" text="Date of Birth" />
+                  <JFXTextField fx:id="dobTxt" prefWidth="150.0" styleClass="txt" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Gender" />
+                  <fx:define>
+                     <ToggleGroup fx:id="gender" />
+                  </fx:define>
+                  <JFXRadioButton fx:id="maleRBtn" text="Male" toggleGroup="$gender" />
+                  <JFXRadioButton fx:id="femaleRBtn" text="Female" toggleGroup="$gender" />
+                  <JFXRadioButton fx:id="otherRBtn" text="Other" toggleGroup="$gender" />
+               </children>
+            </HBox>
+            <HBox spacing="10.0">
+               <children>
+                  <JFXButton fx:id="updateBtn" onAction="#updateBtnOnAction" styleClass="btn, btn-success" text="Update" />
+                  <JFXButton fx:id="deleteBtn" onAction="#deleteBtnOnAction" styleClass="btn, btn-danger" text="Delete" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>

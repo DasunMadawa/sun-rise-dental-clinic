@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXRadioButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" prefHeight="700.0" prefWidth="880.0" style="-fx-background-color: transparent;" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.RegistrationFormController">
+   <content>
+      <VBox spacing="18.0">
+         <padding>
+            <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+         </padding>
+         <children>
+            <Label styleClass="page-title" text="Register Appointment" />
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="120.0" text="Appointment No" />
+                  <JFXTextField fx:id="appointmentNoTxt" editable="false" prefWidth="150.0" />
+                  <Label styleClass="field-label" prefWidth="100.0" text="Date" />
+                  <JFXTextField fx:id="appointmentDateTxt" prefWidth="150.0" styleClass="txt" />
+               </children>
+            </HBox>
+
+            <VBox spacing="14.0" styleClass="card">
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="16.0" />
+               </padding>
+               <children>
+                  <Label styleClass="section-title" text="Patient" />
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="120.0" text="NIC" />
+                        <JFXTextField fx:id="nicTxt" prefWidth="200.0" promptText="200012345678" styleClass="txt" />
+                        <JFXButton fx:id="searchBtn" onAction="#searchBtnOnAction" styleClass="btn, btn-primary" text="Search / New" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="120.0" text="Patient Id" />
+                        <JFXTextField fx:id="patientIdTxt" editable="false" prefWidth="150.0" />
+                        <Label styleClass="field-label" prefWidth="100.0" text="Name" />
+                        <JFXTextField fx:id="nameTxt" prefWidth="220.0" styleClass="txt" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="120.0" text="Address" />
+                        <JFXTextField fx:id="addressTxt" prefWidth="220.0" styleClass="txt" />
+                        <Label styleClass="field-label" prefWidth="100.0" text="Contact No" />
+                        <JFXTextField fx:id="contactTxt" prefWidth="150.0" promptText="07XXXXXXXX" styleClass="txt" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="120.0" text="Date of Birth" />
+                        <JFXTextField fx:id="dobTxt" prefWidth="150.0" promptText="yyyy-MM-dd" styleClass="txt" />
+                        <Label styleClass="field-label" prefWidth="100.0" text="Gender" />
+                        <fx:define>
+                           <ToggleGroup fx:id="gender" />
+                        </fx:define>
+                        <JFXRadioButton fx:id="maleRBtn" text="Male" toggleGroup="$gender" />
+                        <JFXRadioButton fx:id="femaleRBtn" text="Female" toggleGroup="$gender" />
+                        <JFXRadioButton fx:id="otherRBtn" text="Other" toggleGroup="$gender" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <VBox spacing="14.0" styleClass="card">
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="16.0" />
+               </padding>
+               <children>
+                  <Label styleClass="section-title" text="Appointment" />
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="120.0" text="Dentist" />
+                        <JFXComboBox fx:id="dentistComboBox" prefWidth="220.0" />
+                        <Label styleClass="field-label" prefWidth="100.0" text="Treatment" />
+                        <JFXComboBox fx:id="treatmentComboBox" onAction="#treatmentComboBoxOnAction" prefWidth="180.0" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="120.0" text="Tooth Count" />
+                        <JFXTextField fx:id="toothCountTxt" prefWidth="80.0" styleClass="txt" />
+                        <Label styleClass="field-label" prefWidth="100.0" text="Time" />
+                        <JFXTextField fx:id="appointmentTimeTxt" prefWidth="120.0" promptText="HH:mm" styleClass="txt" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <JFXButton fx:id="registerBtn" onAction="#registerBtnOnAction" prefHeight="40.0" prefWidth="220.0" styleClass="btn, btn-success" text="Register" />
+         </children>
+      </VBox>
+   </content>
+</ScrollPane>

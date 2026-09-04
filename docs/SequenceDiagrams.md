@@ -16,6 +16,7 @@ straight through JDBC as it happens rather than waiting to be flushed on exit.
 sequenceDiagram
     actor Receptionist
     participant UI as LoginFormController
+    participant Model as UserModel
     participant Dao as UserDAO
     participant DB as MySQL database
 
@@ -24,12 +25,16 @@ sequenceDiagram
     loop up to 3 attempts
         UI->>Receptionist: prompt username and password
         Receptionist->>UI: enter credentials
-        UI->>Dao: search(username)
+        UI->>Model: UserModel.search(username)
+        activate Model
+        Model->>Dao: search(username)
         activate Dao
         Dao->>DB: SELECT ... FROM user LEFT JOIN staff/dentist WHERE user_id=? OR username=?
         DB-->>Dao: matching row (or none)
-        Dao-->>UI: Receptionist/Dentist/Manager object, or null
+        Dao-->>Model: ReceptionistModel/DentistModel/ManagerModel object, or null
         deactivate Dao
+        Model-->>UI: same
+        deactivate Model
 
         alt user found
             UI->>UI: user.checkPassword(plain) — hashes plain, compares to passwordHash
@@ -56,7 +61,7 @@ sequenceDiagram
     end
 ```
 
-**Design notes.** Passwords get compared as hashes (`User.checkPassword`
+**Design notes.** Passwords get compared as hashes (`UserModel.checkPassword`
 delegates to `util.PasswordUtil`), so the `user` table never has a readable
 password sitting in it. The attempt counter is a static field on
 `LoginFormController` rather than something enforced in the FXML itself — it
@@ -67,9 +72,13 @@ out in a public waiting area. The menu itself comes from
 they're not allowed to touch, which beats showing the option and then telling
 them no afterwards. There's no separate `AuthService`/`UserRepository` pair —
 `UserDAO` does the lookup (joining `staff`/`dentist` depending on role) and
-the `User` subclass itself does the password check and menu-building, which
+the `UserModel` subclass itself does the password check and menu-building, which
 is the same "push behaviour onto the model instead of a service layer" choice
-described in ClassDiagram.md §3.
+described in ClassDiagram.md §3. Note that `LoginFormController` never talks to
+`UserDAO` directly — it calls the static `UserModel.search(username)`, and `UserModel`
+is the one holding the `UserDAO` field and making the call. If the DAO's
+method signature ever changes, `UserModel` is the only class that has to change
+with it.
 
 ---
 
@@ -79,27 +88,38 @@ described in ClassDiagram.md §3.
 sequenceDiagram
     actor Receptionist
     participant UI as RegistrationFormController
+    participant PModel as PatientModel
+    participant DModel as DentistModel
+    participant AModel as AppointmentModel
     participant PDao as PatientDAO
     participant UDao as UserDAO
     participant ADao as AppointmentDAO
 
     Receptionist->>UI: open "Register Appointment"
     activate UI
-    UI->>ADao: generateNextId()
-    ADao-->>UI: "APT0042"
-    UI->>UDao: getAllDentists()
-    UDao-->>UI: active Dentist list, for the combo box
+    UI->>AModel: AppointmentModel.generateNextId()
+    AModel->>ADao: generateNextId()
+    ADao-->>AModel: "APT0042"
+    AModel-->>UI: same
+    UI->>DModel: DentistModel.getAllActive()
+    DModel->>UDao: getAllDentists()
+    UDao-->>DModel: active DentistModel list
+    DModel-->>UI: same, for the combo box
     UI->>Receptionist: form shown, appointment number pre-filled
 
     Receptionist->>UI: enter NIC, click "Search / New"
-    UI->>PDao: searchByNic(nic)
-    PDao-->>UI: Patient object, or null
+    UI->>PModel: PatientModel.searchByNic(nic)
+    PModel->>PDao: searchByNic(nic)
+    PDao-->>PModel: PatientModel object, or null
+    PModel-->>UI: same
 
     alt existing patient found
         UI->>Receptionist: "Found: Mr S. Perera, 42. Reusing existing record." (fields pre-filled, read-only)
     else new patient
-        UI->>PDao: generateNextId()
-        PDao-->>UI: "PAT0119"
+        UI->>PModel: PatientModel.generateNextId()
+        PModel->>PDao: generateNextId()
+        PDao-->>PModel: "PAT0119"
+        PModel-->>UI: same
         UI->>Receptionist: patient fields left editable, validated live via util.Validations
     end
 
@@ -107,19 +127,23 @@ sequenceDiagram
     UI->>UI: toothCountTxt disabled/forced to 1 when treatment.isPerTooth() is false
     Receptionist->>UI: click "Register"
 
-    UI->>UI: build Appointment(status = SCHEDULED)
-    UI->>ADao: getByDentistAndDate(dentistID, date)
-    ADao-->>UI: that dentist's appointments on that date
+    UI->>UI: build AppointmentModel(status = SCHEDULED)
+    UI->>AModel: AppointmentModel.getByDentistAndDate(dentistID, date)
+    AModel->>ADao: getByDentistAndDate(dentistID, date)
+    ADao-->>AModel: that dentist's appointments on that date
+    AModel-->>UI: same
     UI->>UI: for each, appointment.overlaps(other)
 
     alt slot already occupied
         UI->>Receptionist: "Dr Silva is booked 10:00-10:45. Next free slot: 11:00." (time field pre-filled with the suggestion)
     else slot free
         opt new patient
-            UI->>PDao: add(patient)
+            UI->>PModel: patient.save()
+            PModel->>PDao: add(patient)
         end
-        UI->>ADao: add(appointment)
-        ADao-->>UI: written to the appointment table
+        UI->>AModel: appointment.save()
+        AModel->>ADao: add(appointment)
+        ADao-->>AModel: written to the appointment table
         UI->>Receptionist: "Appointment APT0042 confirmed: 2026-09-12 at 11:00."
     end
     deactivate UI
@@ -130,16 +154,17 @@ booking that gets rejected never leaves a half-written record behind. Slot
 length is duration times tooth count, not just duration on its own — three
 fillings take three times as long in the chair, and if that wasn't accounted
 for, overlapping bookings would just creep back in, which is exactly what this
-whole check is meant to stop. `Appointment.overlaps()` only returns true when
+whole check is meant to stop. `AppointmentModel.overlaps()` only returns true when
 both appointments' `status.blocksSlot()` holds, so a cancelled booking frees
 its slot up on its own without the controller having to special-case it.
 Suggesting the next free slot instead of just saying "no" is a usability call
 — the receptionist has a patient standing at the counter and needs something
 to offer right away, not another search to run. There's no `AppointmentService`
-in between — `RegistrationFormController` calls `AppointmentDAO` directly and
-asks the `Appointment` model object itself whether it overlaps, per the same
-"model absorbs the business rule" choice as clash detection has always used
-in ClassDiagram.md.
+in between, and `RegistrationFormController` never calls `PatientDAO`,
+`UserDAO` or `AppointmentDAO` directly either — every one of those calls goes
+through `PatientModel`/`DentistModel`/`AppointmentModel` first, which is what actually holds
+the DAO field. The controller asks the model to search, save, or check
+`overlaps()`; it never touches a DAO type at all.
 
 ---
 
@@ -149,38 +174,44 @@ in ClassDiagram.md.
 sequenceDiagram
     actor Receptionist
     participant UI as BillingFormController
+    participant AModel as AppointmentModel
+    participant PayModel as PaymentModel
     participant ADao as AppointmentDAO
-    participant Enum as TreatmentType
     participant PDao as PaymentDAO
 
     Receptionist->>UI: enter appointment number, click "Find"
     activate UI
-    UI->>ADao: search("APT0042")
-    ADao-->>UI: Appointment or null
+    UI->>AModel: AppointmentModel.search("APT0042")
+    AModel->>ADao: search("APT0042")
+    ADao-->>AModel: AppointmentModel or null
+    AModel-->>UI: same
 
     alt appointment not found
         UI->>Receptionist: "No appointment found with number APT0042."
     else already billed
-        UI->>PDao: searchByAppointmentNo("APT0042")
-        PDao-->>UI: existing Payment
+        UI->>PayModel: PaymentModel.searchByAppointmentNo("APT0042")
+        PayModel->>PDao: searchByAppointmentNo("APT0042")
+        PDao-->>PayModel: existing PaymentModel
+        PayModel-->>UI: same
         UI->>Receptionist: "This appointment has already been billed (PAY0042)."
     else appointment found, not yet billed
-        UI->>Enum: getUnitCost(), isPerTooth()
-        Enum-->>UI: 6000.00, true
-        UI->>UI: treatmentCost = 6000.00 x 3 = 18000.00
-        UI->>UI: consultationFee = appointment.dentist.consultationFee
+        UI->>AModel: appointment.getTreatmentCost(), appointment.getConsultationFee()
+        AModel-->>UI: 18000.00, 2500.00
         UI->>Receptionist: display fee/cost breakdown, discountTxt enabled only if currentUser.canManagePrices()
 
         opt manager authorises a discount
             Receptionist->>UI: enter discount amount
-            UI->>UI: recalculate total on every keystroke
+            UI->>PayModel: build preview PaymentModel, payment.getTotalAmount()
+            PayModel-->>UI: running total, recalculated on every keystroke
         end
 
         Receptionist->>UI: pick payment method, click "Issue Bill"
-        UI->>UI: construct Payment with figures copied, not referenced
-        UI->>PDao: add(payment)
-        PDao-->>UI: written to the payment table
-        UI->>ADao: update(appointment) — status = COMPLETED
+        UI->>UI: construct PaymentModel with figures copied, not referenced
+        UI->>PayModel: payment.save()
+        PayModel->>PDao: add(payment)
+        PDao-->>PayModel: written to the payment table
+        UI->>AModel: appointment.update() — status = COMPLETED
+        AModel->>ADao: update(appointment)
         UI->>Receptionist: receiptArea shows "Filling x 3 @ Rs. 6,000.00", "Bill PAY0042 issued. Total: Rs. 20,500.00"
     end
     deactivate UI
@@ -190,7 +221,7 @@ sequenceDiagram
 from the `TreatmentType` enum itself rather than letting someone type a figure
 in, which is really the whole point — that manual typing is what caused the
 clinic's billing errors in the first place. The figures get copied into
-`Payment` rather than just referenced, so reprinting an old receipt after a
+`PaymentModel` rather than just referenced, so reprinting an old receipt after a
 price change still shows what the patient actually paid at the time. The
 receipt prints the full breakdown instead of just a total, since a patient who
 questions a charge needs to see how it was arrived at, not just be told a
@@ -198,9 +229,13 @@ number. The discount field's `disable` is bound to
 `currentUser.canManagePrices()` rather than just a runtime check on submit —
 a receptionist should never see it as editable in the first place, not be
 allowed to type into it and get corrected afterwards. There's no separate
-`BillingService` object; the controller builds the `Payment` itself and asks
-`Payment.getTotalAmount()` to do the arithmetic, the same "model, not service"
-shape used everywhere else in this design.
+`BillingService` object; the controller builds the `PaymentModel` itself and asks
+`PaymentModel.getTotalAmount()` to do the arithmetic, the same "model, not service"
+shape used everywhere else in this design. Per-tooth pricing
+(`AppointmentModel.getTreatmentCost()`) and the running total
+(`PaymentModel.getTotalAmount()`) are both model methods too, and
+`BillingFormController` never touches `AppointmentDAO`/`PaymentDAO` directly —
+`AppointmentModel`/`PaymentModel` are the ones holding those DAO fields.
 
 ---
 
@@ -260,6 +295,13 @@ an "error free, effective" application with "appropriate messages" in it, and
 you can't really show that with happy-path-only diagrams. Each `alt` fragment
 uses the actual wording the user would see in an `Alert`, so these diagrams
 end up doubling as a spec for what the interface should say.
+
+**Every controller talks to a model participant, never straight to a DAO.**
+`PatientModel`, `DentistModel`, `AppointmentModel` and `PaymentModel` all appear as their own
+lifelines specifically to show that the controller's call stops at the model
+— `UI->>AModel: AppointmentModel.search(...)` — and it's the model that then calls
+`ADao`. No controller lifeline in any of these four diagrams has an arrow
+pointing directly at a DAO participant.
 
 **DAOs show up as participants everywhere, but the database itself only
 appears in Figure 3a.** Once it's shown that a DAO reads and writes through

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXPasswordField?>
+<?import com.jfoenix.controls.JFXRadioButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="700.0" prefWidth="1000.0" spacing="14.0" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.UserFormController">
+   <padding>
+      <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+   </padding>
+   <children>
+      <Label styleClass="page-title" text="Users" />
+      <Label styleClass="muted" text="Click a row to load it below, or search by User Id / Username." />
+
+      <TableView fx:id="table" VBox.vgrow="ALWAYS">
+        <columns>
+          <TableColumn fx:id="userIdCol" prefWidth="100.0" text="User Id" />
+          <TableColumn fx:id="usernameCol" prefWidth="130.0" text="Username" />
+          <TableColumn fx:id="roleCol" prefWidth="110.0" text="Role" />
+          <TableColumn fx:id="detailCol" prefWidth="180.0" text="Designation / Specialization" />
+          <TableColumn fx:id="contactCol" prefWidth="110.0" text="Contact" />
+          <TableColumn fx:id="activeCol" prefWidth="70.0" text="Active" />
+        </columns>
+      </TableView>
+
+      <VBox spacing="12.0" styleClass="card">
+         <padding>
+            <Insets bottom="16.0" left="20.0" right="20.0" top="16.0" />
+         </padding>
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="User Id" />
+                  <JFXTextField fx:id="searchTxt" prefWidth="150.0" promptText="user id or username" styleClass="txt" />
+                  <JFXButton fx:id="searchBtn" onAction="#searchBtnOnAction" styleClass="btn, btn-primary" text="Search" />
+               </children>
+            </HBox>
+            <JFXTextField fx:id="userIdTxt" managed="false" visible="false" />
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Username" />
+                  <JFXTextField fx:id="usernameTxt" prefWidth="180.0" styleClass="txt" />
+                  <Label styleClass="field-label" prefWidth="90.0" text="Password" />
+                  <JFXPasswordField fx:id="passwordTxt" prefWidth="180.0" promptText="Only for new user" styleClass="txt" />
+               </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Role" />
+                  <fx:define>
+                     <ToggleGroup fx:id="role" />
+                  </fx:define>
+                  <JFXRadioButton fx:id="receptionistRBtn" onAction="#rolePaneOnAction" text="Receptionist" toggleGroup="$role" />
+                  <JFXRadioButton fx:id="dentistRBtn" onAction="#rolePaneOnAction" text="Dentist" toggleGroup="$role" />
+                  <JFXRadioButton fx:id="managerRBtn" onAction="#rolePaneOnAction" text="Manager" toggleGroup="$role" />
+               </children>
+            </HBox>
+
+            <VBox fx:id="staffPane" spacing="10.0">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="90.0" text="Designation" />
+                        <JFXTextField fx:id="designationTxt" prefWidth="180.0" styleClass="txt" />
+                        <Label styleClass="field-label" prefWidth="90.0" text="Contact No" />
+                        <JFXTextField fx:id="staffContactTxt" prefWidth="150.0" styleClass="txt" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="90.0" text="Email" />
+                        <JFXTextField fx:id="emailTxt" prefWidth="220.0" styleClass="txt" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <VBox fx:id="dentistPane" spacing="10.0">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="90.0" text="Full Name" />
+                        <JFXTextField fx:id="dentistNameTxt" prefWidth="180.0" styleClass="txt" />
+                        <Label styleClass="field-label" prefWidth="90.0" text="Specialization" />
+                        <JFXTextField fx:id="specializationTxt" prefWidth="180.0" styleClass="txt" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="90.0" text="Contact No" />
+                        <JFXTextField fx:id="dentistContactTxt" prefWidth="150.0" styleClass="txt" />
+                        <Label styleClass="field-label" prefWidth="120.0" text="Consultation Fee" />
+                        <JFXTextField fx:id="feeTxt" prefWidth="100.0" styleClass="txt" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="90.0" text="Available Days" />
+                        <JFXTextField fx:id="daysTxt" prefWidth="300.0" promptText="MONDAY,TUESDAY,..." styleClass="txt" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+
+            <HBox spacing="10.0">
+               <children>
+                  <JFXButton fx:id="addBtn" onAction="#addBtnOnAction" styleClass="btn, btn-primary" text="Add" />
+                  <JFXButton fx:id="updateBtn" onAction="#updateBtnOnAction" styleClass="btn, btn-success" text="Update" />
+                  <JFXButton fx:id="deleteBtn" onAction="#deleteBtnOnAction" styleClass="btn, btn-danger" text="Delete" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>

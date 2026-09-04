@@ -18,7 +18,7 @@ captioned as Figure 2a and 2b.
 classDiagram
     direction TB
 
-    class User {
+    class UserModel {
         <<abstract>>
         #String userID
         #String username
@@ -32,12 +32,12 @@ classDiagram
         +getMenuOptions() List~String~
     }
 
-    class Receptionist {
+    class ReceptionistModel {
         -String designation
         +getMenuOptions() List~String~
     }
 
-    class Dentist {
+    class DentistModel {
         -String specialization
         -double consultationFee
         -List~String~ availableDays
@@ -45,11 +45,11 @@ classDiagram
         +getMenuOptions() List~String~
     }
 
-    class Manager {
+    class ManagerModel {
         +getMenuOptions() List~String~
     }
 
-    class Patient {
+    class PatientModel {
         -String patientID
         -String patientName
         -String address
@@ -62,10 +62,10 @@ classDiagram
         +toFileString() String
     }
 
-    class Appointment {
+    class AppointmentModel {
         -String appointmentNo
-        -Patient patient
-        -Dentist dentist
+        -PatientModel patient
+        -DentistModel dentist
         -String bookedByStaffID
         -TreatmentType treatment
         -int noTooth
@@ -75,11 +75,11 @@ classDiagram
         -String remarks
         +getEndTime() LocalTime
         +getDurationMinutes() int
-        +overlaps(Appointment other) boolean
+        +overlaps(AppointmentModel other) boolean
         +toFileString() String
     }
 
-    class Payment {
+    class PaymentModel {
         -String paymentID
         -String appointmentNo
         -double consultationFee
@@ -152,19 +152,19 @@ classDiagram
         OTHER
     }
 
-    User <|-- Receptionist
-    User <|-- Dentist
-    User <|-- Manager
-    User --> UserRole
+    UserModel <|-- ReceptionistModel
+    UserModel <|-- DentistModel
+    UserModel <|-- ManagerModel
+    UserModel --> UserRole
 
-    Appointment "0..*" o-- "1" Patient
-    Appointment "0..*" o-- "1" Dentist
-    Appointment --> TreatmentType
-    Appointment --> AppointmentStatus
-    Appointment "1" --> "1" Payment
-    Payment --> PaymentStatus
-    Payment --> PaymentMethod
-    Patient --> Gender
+    AppointmentModel "0..*" o-- "1" PatientModel
+    AppointmentModel "0..*" o-- "1" DentistModel
+    AppointmentModel --> TreatmentType
+    AppointmentModel --> AppointmentStatus
+    AppointmentModel "1" --> "1" PaymentModel
+    PaymentModel --> PaymentStatus
+    PaymentModel --> PaymentMethod
+    PatientModel --> Gender
 ```
 
 ---
@@ -181,14 +181,13 @@ classDiagram
     }
 
     class LoginFormController {
-        -UserDAO userDAO
         $int failedAttempts
         $int MAX_ATTEMPTS
         +loginBtnOnAction(ActionEvent e) void
     }
 
     class DashboardFormController {
-        $User currentUser
+        $UserModel currentUser
         +initialize() void
         -buildMenu() void
         -loadContent(String option) void
@@ -196,38 +195,62 @@ classDiagram
     }
 
     class MenuFormController {
-        -QueryDAO queryDAO
         +initialize() void
     }
 
     class RegistrationFormController {
-        -PatientDAO patientDAO
-        -AppointmentDAO appointmentDAO
-        -UserDAO userDAO
         +searchBtnOnAction(ActionEvent e) void
         +registerBtnOnAction(ActionEvent e) void
     }
 
     class PatientsFormController {
-        -PatientDAO patientDAO
-        -AppointmentDAO appointmentDAO
         +searchBtnOnAction(ActionEvent e) void
         +updateBtnOnAction(ActionEvent e) void
         +deleteBtnOnAction(ActionEvent e) void
     }
 
     class UserFormController {
-        -UserDAO userDAO
         +addBtnOnAction(ActionEvent e) void
         +updateBtnOnAction(ActionEvent e) void
         +deleteBtnOnAction(ActionEvent e) void
     }
 
     class BillingFormController {
-        -AppointmentDAO appointmentDAO
-        -PaymentDAO paymentDAO
         +findBtnOnAction(ActionEvent e) void
         +issueBillBtnOnAction(ActionEvent e) void
+    }
+
+    class UserModel {
+        +search(String idOrUsername)$ UserModel
+        +save() boolean
+        +update() boolean
+    }
+
+    class PatientModel {
+        +search(String id)$ PatientModel
+        +searchByNic(String nic)$ PatientModel
+        +save() boolean
+        +update() boolean
+    }
+
+    class AppointmentModel {
+        +search(String no)$ AppointmentModel
+        +getByDentistAndDate(String id, LocalDate d)$ List~AppointmentModel~
+        +save() boolean
+        +update() boolean
+    }
+
+    class PaymentModel {
+        +searchByAppointmentNo(String no)$ PaymentModel
+        +save() boolean
+    }
+
+    class DentistModel {
+        +getAllActive()$ List~DentistModel~
+    }
+
+    class ReceptionistModel {
+        +generateNextStaffId()$ String
     }
 
     class SuperDAO {
@@ -251,26 +274,26 @@ classDiagram
 
     class PatientDAO {
         <<interface>>
-        +searchByNic(String nic) Patient
+        +searchByNic(String nic) PatientModel
         +generateNextId() String
     }
 
     class UserDAO {
         <<interface>>
-        +getAllDentists() List~Dentist~
+        +getAllDentists() List~DentistModel~
         +generateNextUserId() String
     }
 
     class AppointmentDAO {
         <<interface>>
-        +getByDentistAndDate(String id, LocalDate d) List~Appointment~
-        +getLatestForPatient(String id) Appointment
+        +getByDentistAndDate(String id, LocalDate d) List~AppointmentModel~
+        +getLatestForPatient(String id) AppointmentModel
         +generateNextId() String
     }
 
     class PaymentDAO {
         <<interface>>
-        +searchByAppointmentNo(String no) Payment
+        +searchByAppointmentNo(String no) PaymentModel
         +generateNextId() String
     }
 
@@ -308,16 +331,30 @@ classDiagram
     DashboardFormController --> UserFormController
     DashboardFormController --> BillingFormController
 
-    LoginFormController --> UserDAO
-    MenuFormController --> QueryDAO
-    RegistrationFormController --> PatientDAO
-    RegistrationFormController --> AppointmentDAO
-    RegistrationFormController --> UserDAO
-    PatientsFormController --> PatientDAO
-    PatientsFormController --> AppointmentDAO
-    UserFormController --> UserDAO
-    BillingFormController --> AppointmentDAO
-    BillingFormController --> PaymentDAO
+    LoginFormController --> UserModel
+    MenuFormController --> PatientModel
+    MenuFormController --> AppointmentModel
+    MenuFormController --> PaymentModel
+    RegistrationFormController --> PatientModel
+    RegistrationFormController --> AppointmentModel
+    RegistrationFormController --> DentistModel
+    PatientsFormController --> PatientModel
+    PatientsFormController --> AppointmentModel
+    UserFormController --> UserModel
+    UserFormController --> DentistModel
+    UserFormController --> ReceptionistModel
+    BillingFormController --> AppointmentModel
+    BillingFormController --> PaymentModel
+
+    UserModel ..> UserDAO
+    DentistModel ..> UserDAO
+    ReceptionistModel ..> UserDAO
+    PatientModel ..> PatientDAO
+    PatientModel ..> QueryDAO
+    AppointmentModel ..> AppointmentDAO
+    AppointmentModel ..> QueryDAO
+    PaymentModel ..> PaymentDAO
+    PaymentModel ..> QueryDAO
 
     CrudDAO ..|> SuperDAO
     PatientDAO --|> CrudDAO
@@ -338,6 +375,17 @@ classDiagram
     QueryDAO ..> DBConnection
 ```
 
+`UserModel`, `PatientModel`, `AppointmentModel`, `PaymentModel`, `DentistModel` and
+`ReceptionistModel` here are the same classes as Figure 2a — shown again with only their
+DAO-facing methods, since Figure 2a already carries their full attribute lists and
+business-rule methods. Every model class in this codebase carries the `Model` suffix
+(`UserModel`, `PatientModel`, `AppointmentModel`, `PaymentModel`, `DentistModel`,
+`ReceptionistModel`, `ManagerModel`) — a naming convention that marks them as the
+active-record-style domain classes, distinct from the DAO interfaces/implementations and
+from the `PatientTM`/`UserTM` table-model classes that back the JavaFX `TableView`s. The
+enums (`Gender`, `UserRole`, `TreatmentType`, `AppointmentStatus`, `PaymentStatus`,
+`PaymentMethod`) keep their plain names — they're classifier/value types, not entities.
+
 ---
 
 ## 3. Design decisions
@@ -346,8 +394,8 @@ classDiagram
 The JavaFX FXML controllers only handle input/output and wiring buttons to
 actions; the actual business rules — clash detection, bill calculation, age,
 menu options per role — live as methods directly on the `model` classes
-(`Appointment.overlaps()`, `Payment.getTotalAmount()`, `Patient.getAge()`,
-`User.getMenuOptions()`); and the `dao` classes deal with the database. There's
+(`AppointmentModel.overlaps()`, `PaymentModel.getTotalAmount()`, `PatientModel.getAge()`,
+`UserModel.getMenuOptions()`); and the `dao` classes deal with the database. There's
 no `bo`/DTO split and no `Service` layer sitting between them — the model
 carries both the data and the behaviour that would otherwise live in a
 service object, so a controller can call `appointmentDAO.getByDentistAndDate(...)`
@@ -356,7 +404,7 @@ controllers instead, the clash-detection logic and the billing formula would
 end up buried among `Alert` dialogs — impossible to test on their own and
 awkward to reuse.
 
-**`User` is abstract, with three subclasses hanging off it.** The ER model
+**`UserModel` is abstract, with three subclasses hanging off it.** The ER model
 already treats this as an "is a" relationship, so inheritance is the obvious
 fit in Java. The real payoff is `getMenuOptions()` — each subclass overrides
 it, so instead of a pile of `if (role.equals("MANAGER"))` checks scattered
@@ -367,15 +415,36 @@ sort it out. If a fourth role ever gets added, that's one new subclass,
 
 **`CrudDAO<T>` is a generic interface, and every custom DAO is built from a
 singleton `DAOFactory` with an enum switch.** Hard-coding `new PatientDAOImpl()`
-straight into every controller would scatter the choice of implementation
-across the whole codebase. Coding against `CrudDAO<T>`/`SuperDAO` instead means
+straight into every caller would scatter the choice of implementation across
+the whole codebase. Coding against `CrudDAO<T>`/`SuperDAO` instead means
 swapping JDBC for something else later is a new set of DAO implementations,
-not a rewrite of the controllers that use them — the same reasoning the
-brief's own text-file design used for `Repository<T>`, just aimed at a JDBC
+not a rewrite of everything that uses them — the same reasoning the brief's
+own text-file design used for `Repository<T>`, just aimed at a JDBC
 persistence layer instead. `DAOFactory.getDAOFactory().getDAO(DAOTypes.PATIENT)`
 is the one place that knows which concrete class backs which DAO type, so
 adding a new DAO is one enum constant and one switch case, not a hunt through
-every controller that needs one.
+every caller that needs one.
+
+**Controllers never call `DAOFactory` — only model classes do.** Each domain
+class holds its own DAO as a `private static final` field and exposes plain
+methods on top of it: `PatientModel.search(id)`, `patient.save()`,
+`AppointmentModel.getByDentistAndDate(...)`, `user.update()`, and so on. A
+controller only ever calls these — it has no field of any DAO type and never
+touches `DAOFactory` itself. This is the active-record shape rather than a
+repository handed to the controller: since there's already no separate
+service/BO layer (the model absorbs those business-rule methods too), letting
+the model also own "how do I load/save myself" keeps the controller down to
+pure UI wiring — read text fields, call a model method, update the screen —
+and means a DAO signature changing only ever touches the one model class that
+owns it, never every controller that happened to call it directly.
+
+**Every entity class carries a `Model` suffix.** `UserModel`, `PatientModel`,
+`AppointmentModel`, `PaymentModel`, `DentistModel`, `ReceptionistModel` and
+`ManagerModel` are all named this way on purpose, so that at a glance a type
+name says which layer it belongs to: `PatientDAO`/`PatientDAOImpl` do the SQL,
+`PatientModel` is the domain object with the business rules, `PatientTM` is the
+flattened row shown in a `TableView`. Three classes can share the same root
+word without a reader having to guess which one is which.
 
 **`DBConnection` is a lazily-initialised singleton wrapping one `java.sql.Connection`.**
 Every DAO implementation asks `DBConnection.getInstance().getConnection()` for
@@ -384,7 +453,7 @@ and cheaper than reconnecting per query — and it's the same "singleton
 wrapping the underlying resource" shape the rest of the application already
 uses for `DAOFactory`.
 
-**`Appointment` aggregates `Patient` and `Dentist` rather than composing them.**
+**`AppointmentModel` aggregates `PatientModel` and `DentistModel` rather than composing them.**
 A patient still exists whether or not they have an appointment, and cancelling
 one doesn't erase the patient — their lifetimes aren't tied together, so a
 hollow diamond fits better than a filled one.
@@ -414,9 +483,9 @@ wrong within a year, a stored end time is wrong the moment the treatment
 changes, a stored total can end up not matching its own components.
 Calculating on demand just removes the possibility of that mismatch.
 
-**`Payment` copies its figures instead of pointing back at them.**
+**`PaymentModel` copies its figures instead of pointing back at them.**
 `consultationFee`, `unitCostCharged` and `noToothBilled` get copied in at the
-moment the bill is raised, rather than read live off `Dentist` and
+moment the bill is raised, rather than read live off `DentistModel` and
 `TreatmentType`. It looks like duplication, and it is, but it's deliberate —
 a receipt has to print exactly the same next year even after the clinic's
 prices change, and keeping the components around lets it show the actual
@@ -430,10 +499,10 @@ treatment isn't per-tooth. Putting the patterns in one place keeps the rules
 consistent across `registration_form`, `patients_form` and `user_form`
 instead of being written slightly differently on every screen.
 
-**`Appointment` stores `bookedByStaffID` as a plain string, not a `Staff`
+**`AppointmentModel` stores `bookedByStaffID` as a plain string, not a `Staff`
 object.** It's only there for the audit trail — recording who took the
 booking. Holding a full reference would mean `AppointmentDAO` has to join in
-and reconstruct a whole `Receptionist` on every read, and it's no real benefit
+and reconstruct a whole `ReceptionistModel` on every read, and it's no real benefit
 when the ID alone is enough to trace it back to them.
 
 ---
@@ -456,10 +525,11 @@ when the ID alone is enough to trace it back to them.
 
 ## 5. Figure captions for the report
 
-> **Figure 2a** — Domain model: the abstract `User` class and its three
-> subclasses, the `Patient`, `Appointment` and `Payment` entities, and the six
+> **Figure 2a** — Domain model: the abstract `UserModel` class and its three
+> subclasses, the `PatientModel`, `AppointmentModel` and `PaymentModel` entities, and the six
 > enums that keep their attributes to a fixed set of values.
 
-> **Figure 2b** — Application architecture: the JavaFX controller/view layer,
-> the model layer carrying the business-rule methods, and the generic
-> `CrudDAO<T>`/`DAOFactory` pair backing a JDBC persistence layer.
+> **Figure 2b** — Application architecture: the JavaFX controller/view layer
+> (UI wiring only), the model layer carrying both the business-rule methods
+> and the DAO calls that load/save them, and the generic `CrudDAO<T>`/
+> `DAOFactory` pair backing a JDBC persistence layer.

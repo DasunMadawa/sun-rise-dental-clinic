@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXPasswordField?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="root" prefHeight="650.0" prefWidth="950.0" style="-fx-background-color: #EEF1F8;" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LoginFormController">
+   <children>
+      <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="380.0" spacing="16.0" styleClass="card">
+         <padding>
+            <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+         </padding>
+         <children>
+            <Label styleClass="page-title" text="Sunrise Dental Clinic">
+               <font>
+                  <Font name="Segoe UI Semibold" size="22.0" />
+               </font>
+            </Label>
+            <Label styleClass="muted" text="Appointment and Patient Management" />
+            <JFXTextField fx:id="userNameTxt" onAction="#userNameTxtOnAction" prefWidth="300.0" promptText="Username" styleClass="txt" />
+            <JFXPasswordField fx:id="passwordTxt" onAction="#passwordTxtOnAction" prefWidth="300.0" promptText="Password" styleClass="txt" />
+            <JFXButton fx:id="loginBtn" maxWidth="Infinity" onAction="#loginBtnOnAction" prefHeight="40.0" styleClass="btn, btn-success" text="Login">
+               <VBox.margin>
+                  <Insets top="6.0" />
+               </VBox.margin>
+            </JFXButton>
+         </children>
+      </VBox>
+   </children>
+</StackPane>

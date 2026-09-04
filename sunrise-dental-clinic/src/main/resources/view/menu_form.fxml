@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXSpinner?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="700.0" prefWidth="880.0" spacing="20.0" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MenuFormController">
+   <padding>
+      <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+   </padding>
+   <children>
+      <Label styleClass="page-title" text="Dashboard" />
+      <HBox spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" styleClass="stat-tile">
+               <children>
+                  <Label styleClass="stat-label" text="Total Patients" />
+                  <Label fx:id="totalPatientsLbl" styleClass="stat-value" text="0" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" styleClass="stat-tile">
+               <children>
+                  <Label styleClass="stat-label" text="Today's Appointments" />
+                  <Label fx:id="todayAppointmentsLbl" styleClass="stat-value" text="0" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" styleClass="stat-tile">
+               <children>
+                  <Label styleClass="stat-label" text="This Month's Revenue" />
+                  <Label fx:id="monthRevenueLbl" styleClass="stat-value" text="Rs. 0.00" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="100.0" prefWidth="150.0" styleClass="stat-tile">
+               <children>
+                  <Label styleClass="stat-label" text="Paid %" />
+                  <JFXSpinner fx:id="paidSpinner" prefHeight="50.0" prefWidth="50.0" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <LineChart fx:id="lineChart" legendVisible="false" styleClass="card" VBox.vgrow="ALWAYS" title="Monthly Revenue">
+        <xAxis>
+          <CategoryAxis fx:id="monthAxisX" label="Month" side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis fx:id="revenueAxisY" label="Revenue (Rs.)" side="LEFT" />
+        </yAxis>
+      </LineChart>
+   </children>
+</VBox>

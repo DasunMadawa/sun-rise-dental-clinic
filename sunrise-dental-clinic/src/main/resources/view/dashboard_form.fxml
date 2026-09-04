@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="700.0" prefWidth="1100.0" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DashboardFormController">
+   <left>
+      <VBox minWidth="220.0" prefWidth="220.0" spacing="6.0" styleClass="sidebar" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="20.0" left="15.0" right="15.0" top="20.0" />
+         </padding>
+         <children>
+            <Label styleClass="sidebar-title" text="Sunrise Dental Clinic" wrapText="true" />
+            <Label fx:id="welcomeLbl" styleClass="sidebar-user" wrapText="true">
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </Label>
+            <Separator opacity="0.25" />
+            <VBox fx:id="menuBox" spacing="4.0" VBox.vgrow="ALWAYS">
+               <VBox.margin>
+                  <Insets top="16.0" />
+               </VBox.margin>
+            </VBox>
+            <JFXButton onAction="#logoutBtnOnAction" maxWidth="Infinity" styleClass="logout-btn" text="Logout" />
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <AnchorPane fx:id="contentPane" style="-fx-background-color: #EEF1F8;" BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>
