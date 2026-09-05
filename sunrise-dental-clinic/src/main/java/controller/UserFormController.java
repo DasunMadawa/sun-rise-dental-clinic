@@ -82,6 +82,9 @@ public class UserFormController {
     private JFXPasswordField passwordTxt;
 
     @FXML
+    private JFXTextField loginEmailTxt;
+
+    @FXML
     private JFXTextField designationTxt;
 
     @FXML
@@ -116,6 +119,9 @@ public class UserFormController {
 
     @FXML
     private JFXButton deleteBtn;
+
+    @FXML
+    private JFXButton clearBtn;
 
     UserModel selectedUser;
 
@@ -200,14 +206,14 @@ public class UserFormController {
 
             UserModel user;
             if (receptionistRBtn.isSelected()) {
-                user = new ReceptionistModel(userId, usernameTxt.getText(), passwordHash, true, null,
+                user = new ReceptionistModel(userId, usernameTxt.getText(), passwordHash, true, null, loginEmailTxt.getText(),
                         ReceptionistModel.generateNextStaffId(), designationTxt.getText(), staffContactTxt.getText(), emailTxt.getText());
             } else if (dentistRBtn.isSelected()) {
-                user = new DentistModel(userId, usernameTxt.getText(), passwordHash, true, null,
+                user = new DentistModel(userId, usernameTxt.getText(), passwordHash, true, null, loginEmailTxt.getText(),
                         DentistModel.generateNextDentistId(), dentistNameTxt.getText(), specializationTxt.getText(),
                         dentistContactTxt.getText(), Double.parseDouble(feeTxt.getText()), Arrays.asList(daysTxt.getText().split(",")));
             } else {
-                user = new ManagerModel(userId, usernameTxt.getText(), passwordHash, true, null);
+                user = new ManagerModel(userId, usernameTxt.getText(), passwordHash, true, null, loginEmailTxt.getText());
             }
 
             user.save();
@@ -242,13 +248,14 @@ public class UserFormController {
             searchTxt.setText(selectedUser.getUserID());
             userIdTxt.setText(selectedUser.getUserID());
             usernameTxt.setText(selectedUser.getUsername());
+            loginEmailTxt.setText(selectedUser.getEmail());
 
             if (selectedUser instanceof ReceptionistModel) {
                 receptionistRBtn.setSelected(true);
                 ReceptionistModel r = (ReceptionistModel) selectedUser;
                 designationTxt.setText(r.getDesignation());
                 staffContactTxt.setText(r.getContactNo());
-                emailTxt.setText(r.getEmail());
+                emailTxt.setText(r.getStaffEmail());
             } else if (selectedUser instanceof DentistModel) {
                 dentistRBtn.setSelected(true);
                 DentistModel d = (DentistModel) selectedUser;
@@ -274,12 +281,13 @@ public class UserFormController {
     void updateBtnOnAction(ActionEvent event) {
         try {
             selectedUser.setUsername(usernameTxt.getText());
+            selectedUser.setEmail(loginEmailTxt.getText());
 
             if (selectedUser instanceof ReceptionistModel) {
                 ReceptionistModel r = (ReceptionistModel) selectedUser;
                 r.setDesignation(designationTxt.getText());
                 r.setContactNo(staffContactTxt.getText());
-                r.setEmail(emailTxt.getText());
+                r.setStaffEmail(emailTxt.getText());
             } else if (selectedUser instanceof DentistModel) {
                 DentistModel d = (DentistModel) selectedUser;
                 d.setDentistName(dentistNameTxt.getText());
@@ -321,10 +329,19 @@ public class UserFormController {
 
     }
 
+    @FXML
+    void clearBtnOnAction(ActionEvent event) {
+        selectedUser = null;
+        table.getSelectionModel().clearSelection();
+        table.getFocusModel().focus(-1);
+        clearTxtFields();
+    }
+
     private void clearTxtFields() {
         userIdTxt.clear();
         usernameTxt.clear();
         passwordTxt.clear();
+        loginEmailTxt.clear();
         designationTxt.clear();
         staffContactTxt.clear();
         emailTxt.clear();

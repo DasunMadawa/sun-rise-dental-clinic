@@ -67,7 +67,7 @@ classDiagram
         -PatientModel patient
         -DentistModel dentist
         -String bookedByStaffID
-        -TreatmentType treatment
+        -TreatmentTypeModel treatment
         -int noTooth
         -LocalDate appointmentDate
         -LocalTime appointmentTime
@@ -94,24 +94,17 @@ classDiagram
         +toFileString() String
     }
 
-    class TreatmentType {
-        <<enumeration>>
-        CHECKING
-        SCALING
-        FILLING
-        EXTRACTION
-        ROOT_CANAL
-        CROWN
-        DENTURE
-        WHITENING
-        BRACES_REVIEW
+    class TreatmentTypeModel {
         -String code
+        -String name
         -double unitCost
         -boolean isPerTooth
         -int durationMinutes
         +getUnitCost() double
         +isPerTooth() boolean
-        +fromCode(String code) TreatmentType
+        +fromCodeOrDefault(String code)$ TreatmentTypeModel
+        +save() boolean
+        +update() boolean
     }
 
     class AppointmentStatus {
@@ -159,7 +152,7 @@ classDiagram
 
     AppointmentModel "0..*" o-- "1" PatientModel
     AppointmentModel "0..*" o-- "1" DentistModel
-    AppointmentModel --> TreatmentType
+    AppointmentModel --> TreatmentTypeModel
     AppointmentModel --> AppointmentStatus
     AppointmentModel "1" --> "1" PaymentModel
     PaymentModel --> PaymentStatus
@@ -253,6 +246,17 @@ classDiagram
         +generateNextStaffId()$ String
     }
 
+    class TreatmentTypeFormController {
+        +addBtnOnAction(ActionEvent e) void
+        +updateBtnOnAction(ActionEvent e) void
+        +deleteBtnOnAction(ActionEvent e) void
+    }
+
+    class AppointmentsFormController {
+        +cancelBtnOnAction(ActionEvent e) void
+        +clearFiltersBtnOnAction(ActionEvent e) void
+    }
+
     class SuperDAO {
         <<interface>>
     }
@@ -305,6 +309,10 @@ classDiagram
         +getRevenueChart() double[]
     }
 
+    class TreatmentTypeDAO {
+        <<interface>>
+    }
+
     class DBConnection {
         $DBConnection instance
         $Connection connection
@@ -330,6 +338,8 @@ classDiagram
     DashboardFormController --> PatientsFormController
     DashboardFormController --> UserFormController
     DashboardFormController --> BillingFormController
+    DashboardFormController --> TreatmentTypeFormController
+    DashboardFormController --> AppointmentsFormController
 
     LoginFormController --> UserModel
     MenuFormController --> PatientModel
@@ -338,6 +348,7 @@ classDiagram
     RegistrationFormController --> PatientModel
     RegistrationFormController --> AppointmentModel
     RegistrationFormController --> DentistModel
+    RegistrationFormController --> TreatmentTypeModel
     PatientsFormController --> PatientModel
     PatientsFormController --> AppointmentModel
     UserFormController --> UserModel
@@ -345,6 +356,8 @@ classDiagram
     UserFormController --> ReceptionistModel
     BillingFormController --> AppointmentModel
     BillingFormController --> PaymentModel
+    TreatmentTypeFormController --> TreatmentTypeModel
+    AppointmentsFormController --> AppointmentModel
 
     UserModel ..> UserDAO
     DentistModel ..> UserDAO
@@ -355,24 +368,28 @@ classDiagram
     AppointmentModel ..> QueryDAO
     PaymentModel ..> PaymentDAO
     PaymentModel ..> QueryDAO
+    TreatmentTypeModel ..> TreatmentTypeDAO
 
     CrudDAO ..|> SuperDAO
     PatientDAO --|> CrudDAO
     UserDAO --|> CrudDAO
     AppointmentDAO --|> CrudDAO
     PaymentDAO --|> CrudDAO
+    TreatmentTypeDAO --|> CrudDAO
     QueryDAO ..|> SuperDAO
     DAOFactory ..> PatientDAO
     DAOFactory ..> UserDAO
     DAOFactory ..> AppointmentDAO
     DAOFactory ..> PaymentDAO
     DAOFactory ..> QueryDAO
+    DAOFactory ..> TreatmentTypeDAO
 
     PatientDAO ..> DBConnection
     UserDAO ..> DBConnection
     AppointmentDAO ..> DBConnection
     PaymentDAO ..> DBConnection
     QueryDAO ..> DBConnection
+    TreatmentTypeDAO ..> DBConnection
 ```
 
 `UserModel`, `PatientModel`, `AppointmentModel`, `PaymentModel`, `DentistModel` and
@@ -380,11 +397,15 @@ classDiagram
 DAO-facing methods, since Figure 2a already carries their full attribute lists and
 business-rule methods. Every model class in this codebase carries the `Model` suffix
 (`UserModel`, `PatientModel`, `AppointmentModel`, `PaymentModel`, `DentistModel`,
-`ReceptionistModel`, `ManagerModel`) — a naming convention that marks them as the
-active-record-style domain classes, distinct from the DAO interfaces/implementations and
-from the `PatientTM`/`UserTM` table-model classes that back the JavaFX `TableView`s. The
-enums (`Gender`, `UserRole`, `TreatmentType`, `AppointmentStatus`, `PaymentStatus`,
-`PaymentMethod`) keep their plain names — they're classifier/value types, not entities.
+`ReceptionistModel`, `ManagerModel`, `TreatmentTypeModel`) — a naming convention that marks
+them as the active-record-style domain classes, distinct from the DAO interfaces/
+implementations and from the `PatientTM`/`UserTM` table-model classes that back the
+JavaFX `TableView`s. The remaining enums (`Gender`, `UserRole`, `AppointmentStatus`,
+`PaymentStatus`, `PaymentMethod`) keep their plain names — they're classifier/value types,
+not entities. `TreatmentType` used to be one of these enums but moved to
+`TreatmentTypeModel` (backed by its own `treatment_type` table and `TreatmentTypeDAO`)
+once the clinic needed to add/edit treatment types and prices at runtime instead of
+through a code change — see the design-decision note below.
 
 ---
 
@@ -458,16 +479,26 @@ A patient still exists whether or not they have an appointment, and cancelling
 one doesn't erase the patient — their lifetimes aren't tied together, so a
 hollow diamond fits better than a filled one.
 
-**Six enums instead of plain `String` fields.** Every one of these attributes
+**Five enums instead of plain `String` fields.** Every one of these attributes
 only ever takes a handful of legal values. Leave it as a `String` and a typo
 like `"Cancelled"` vs `"CANCELLED"` compiles fine and just breaks quietly at
-runtime — worse, a bad treatment name could get written straight into a data
-file and stay there. With an enum the compiler catches it, and `switch`
-statements over the type are exhaustive. `TreatmentType` also carries the
-cost, the per-tooth flag, and the duration, so pricing lives in exactly one
-place. `AppointmentStatus.blocksSlot()` only returns true for `SCHEDULED`,
-which is how a cancelled appointment frees up its slot again without any
-special case in the clash checker.
+runtime — worse, a bad status could get written straight into a column and
+stay there. With an enum the compiler catches it, and `switch` statements over
+the type are exhaustive. `AppointmentStatus.blocksSlot()` only returns true
+for `SCHEDULED`, which is how a cancelled appointment frees up its slot again
+without any special case in the clash checker.
+
+**`TreatmentTypeModel` moved from an enum to a real table.** It used to be a
+sixth enum carrying the cost, the per-tooth flag, and the duration, on the
+reasoning that a fixed price list baked into code can't drift. That held up
+right until the clinic needed to actually add a new treatment or change a
+price without a code change and a redeploy — at that point the enum's real
+job (being the *one place* prices live) is better served by a table an admin
+can edit through a CRUD screen, `TreatmentTypeFormController`, than by a
+recompile. The rest of the reasoning carries over unchanged: `treatment_code`
+is still the one thing everything else (appointments, bills, reports)
+references, it just resolves through `TreatmentTypeDAO` now instead of
+`TreatmentType.valueOf()`.
 
 **Searching by appointment number is a query, not an in-memory lookup.**
 `AppointmentDAO.search(appointmentNo)` runs a `SELECT ... WHERE appointment_no=?`
@@ -486,7 +517,7 @@ Calculating on demand just removes the possibility of that mismatch.
 **`PaymentModel` copies its figures instead of pointing back at them.**
 `consultationFee`, `unitCostCharged` and `noToothBilled` get copied in at the
 moment the bill is raised, rather than read live off `DentistModel` and
-`TreatmentType`. It looks like duplication, and it is, but it's deliberate —
+`TreatmentTypeModel`. It looks like duplication, and it is, but it's deliberate —
 a receipt has to print exactly the same next year even after the clinic's
 prices change, and keeping the components around lets it show the actual
 arithmetic instead of a total nobody can check.
@@ -526,8 +557,9 @@ when the ID alone is enough to trace it back to them.
 ## 5. Figure captions for the report
 
 > **Figure 2a** — Domain model: the abstract `UserModel` class and its three
-> subclasses, the `PatientModel`, `AppointmentModel` and `PaymentModel` entities, and the six
-> enums that keep their attributes to a fixed set of values.
+> subclasses, the `PatientModel`, `AppointmentModel`, `PaymentModel` and
+> `TreatmentTypeModel` entities, and the five enums that keep their attributes
+> to a fixed set of values.
 
 > **Figure 2b** — Application architecture: the JavaFX controller/view layer
 > (UI wiring only), the model layer carrying both the business-rule methods

@@ -218,9 +218,12 @@ sequenceDiagram
 ```
 
 **Design notes.** `BillingFormController` gets the unit cost and per-tooth flag
-from the `TreatmentType` enum itself rather than letting someone type a figure
+from `TreatmentTypeModel` itself rather than letting someone type a figure
 in, which is really the whole point — that manual typing is what caused the
-clinic's billing errors in the first place. The figures get copied into
+clinic's billing errors in the first place. (`TreatmentTypeModel` was a fixed
+enum earlier in this design; it's now a CRUD-managed table so prices can be
+added/changed without a code change, but the point stands either way — nobody
+types a price in by hand at billing time.) The figures get copied into
 `PaymentModel` rather than just referenced, so reprinting an old receipt after a
 price change still shows what the patient actually paid at the time. The
 receipt prints the full breakdown instead of just a total, since a patient who
@@ -341,7 +344,7 @@ a row there.
 > happens when the requested slot isn't free.
 
 > **Figure 3c** — Bill calculation and receipt printing: per-tooth cost
-> worked out from the `TreatmentType` enum, plus the optional
+> worked out from `TreatmentTypeModel`, plus the optional
 > manager-authorised discount.
 
 > **Figure 3d** — Logout and close application: clearing the session on

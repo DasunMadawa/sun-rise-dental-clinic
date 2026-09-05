@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="700.0" prefWidth="1000.0" spacing="14.0" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AppointmentsFormController">
+   <padding>
+      <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+   </padding>
+   <children>
+      <Label styleClass="page-title" text="Appointments" />
+      <Label styleClass="muted" text="Search, filter by status or date, and cancel scheduled appointments." />
+
+      <VBox spacing="12.0" styleClass="card">
+         <padding>
+            <Insets bottom="16.0" left="20.0" right="20.0" top="16.0" />
+         </padding>
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <JFXTextField fx:id="searchTxt" prefWidth="220.0" promptText="Search appointment no / patient / dentist" styleClass="txt" />
+                  <JFXComboBox fx:id="statusComboBox" prefWidth="150.0" promptText="Status" />
+                  <DatePicker fx:id="filterDatePicker" prefWidth="150.0" promptText="Date" />
+                  <JFXButton fx:id="clearFiltersBtn" onAction="#clearFiltersBtnOnAction" styleClass="btn, btn-outline" text="Clear Filters" />
+                  <JFXButton fx:id="cancelBtn" onAction="#cancelBtnOnAction" styleClass="btn, btn-danger" text="Cancel Appointment" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <TableView fx:id="table" VBox.vgrow="ALWAYS">
+        <columns>
+          <TableColumn fx:id="appointmentNoCol" prefWidth="100.0" text="Appointment No" />
+          <TableColumn fx:id="patientCol" prefWidth="140.0" text="Patient" />
+          <TableColumn fx:id="dentistCol" prefWidth="130.0" text="Dentist" />
+          <TableColumn fx:id="treatmentCol" prefWidth="120.0" text="Treatment" />
+          <TableColumn fx:id="toothCol" prefWidth="70.0" text="Tooth" />
+          <TableColumn fx:id="dateCol" prefWidth="100.0" text="Date" />
+          <TableColumn fx:id="timeCol" prefWidth="90.0" text="Time" />
+          <TableColumn fx:id="statusCol" prefWidth="100.0" text="Status" />
+        </columns>
+      </TableView>
+   </children>
+</VBox>

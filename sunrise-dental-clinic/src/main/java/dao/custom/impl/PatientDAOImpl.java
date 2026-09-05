@@ -18,7 +18,7 @@ public class PatientDAOImpl implements PatientDAO {
         Connection connection = DBConnection.getInstance().getConnection();
         try {
             PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO patient (patient_id, patient_name, address, contact_no, nic, date_of_birth, gender, registered_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                    "INSERT INTO patient (patient_id, patient_name, address, contact_no, nic, date_of_birth, gender, registered_date, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
             statement.setString(1, patient.getPatientID());
             statement.setString(2, patient.getPatientName());
@@ -28,6 +28,7 @@ public class PatientDAOImpl implements PatientDAO {
             statement.setDate(6, java.sql.Date.valueOf(patient.getDateOfBirth()));
             statement.setString(7, patient.getGender().name());
             statement.setDate(8, java.sql.Date.valueOf(patient.getRegisteredDate()));
+            statement.setString(9, patient.getEmail());
 
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -71,7 +72,7 @@ public class PatientDAOImpl implements PatientDAO {
         Connection connection = DBConnection.getInstance().getConnection();
         try {
             PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE patient SET patient_name=?, address=?, contact_no=?, nic=?, date_of_birth=?, gender=? WHERE patient_id=?"
+                    "UPDATE patient SET patient_name=?, address=?, contact_no=?, nic=?, date_of_birth=?, gender=?, email=? WHERE patient_id=?"
             );
             statement.setString(1, patient.getPatientName());
             statement.setString(2, patient.getAddress());
@@ -79,7 +80,8 @@ public class PatientDAOImpl implements PatientDAO {
             statement.setString(4, patient.getNic());
             statement.setDate(5, java.sql.Date.valueOf(patient.getDateOfBirth()));
             statement.setString(6, patient.getGender().name());
-            statement.setString(7, patient.getPatientID());
+            statement.setString(7, patient.getEmail());
+            statement.setString(8, patient.getPatientID());
 
             return statement.executeUpdate() > 0;
         } catch (Exception e) {
@@ -124,14 +126,14 @@ public class PatientDAOImpl implements PatientDAO {
     public String generateNextId() throws Exception {
         Connection connection = DBConnection.getInstance().getConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT patient_id FROM patient ORDER BY patient_id DESC LIMIT 1");
+            PreparedStatement statement = connection.prepareStatement("SELECT patient_id FROM patient WHERE patient_id REGEXP '^PT[0-9]{3}$' ORDER BY patient_id DESC LIMIT 1");
             ResultSet resultSet = statement.executeQuery();
 
             if (!resultSet.next()) {
-                return "PAT0001";
+                return "PT001";
             }
             String lastId = resultSet.getString("patient_id");
-            return String.format("PAT%04d", Integer.parseInt(lastId.substring(3)) + 1);
+            return String.format("PT%03d", Integer.parseInt(lastId.substring(2)) + 1);
         } catch (Exception e) {
             throw e;
         }
@@ -147,7 +149,8 @@ public class PatientDAOImpl implements PatientDAO {
                 resultSet.getString("nic"),
                 resultSet.getDate("date_of_birth").toLocalDate(),
                 Gender.valueOf(resultSet.getString("gender")),
-                resultSet.getDate("registered_date").toLocalDate()
+                resultSet.getDate("registered_date").toLocalDate(),
+                resultSet.getString("email")
         );
     }
 

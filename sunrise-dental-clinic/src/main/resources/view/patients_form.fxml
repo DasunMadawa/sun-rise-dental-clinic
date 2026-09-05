@@ -4,6 +4,7 @@
 <?import com.jfoenix.controls.JFXRadioButton?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -42,7 +43,7 @@
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
                   <Label styleClass="field-label" prefWidth="90.0" text="Patient Id" />
-                  <JFXTextField fx:id="searchTxt" onAction="#searchTxtOnAction" prefWidth="150.0" promptText="PAT0001" styleClass="txt" />
+                  <JFXTextField fx:id="searchTxt" onAction="#searchTxtOnAction" prefWidth="150.0" promptText="PT001" styleClass="txt" />
                   <JFXButton fx:id="searchBtn" onAction="#searchBtnOnAction" styleClass="btn, btn-primary" text="Search" />
                </children>
             </HBox>
@@ -60,7 +61,13 @@
                   <Label styleClass="field-label" prefWidth="90.0" text="Address" />
                   <JFXTextField fx:id="addressTxt" prefWidth="220.0" styleClass="txt" />
                   <Label styleClass="field-label" prefWidth="90.0" text="Date of Birth" />
-                  <JFXTextField fx:id="dobTxt" prefWidth="150.0" styleClass="txt" />
+                  <DatePicker fx:id="dobPicker" prefWidth="150.0" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Email" />
+                  <JFXTextField fx:id="emailTxt" prefWidth="220.0" styleClass="txt" />
                </children>
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
@@ -78,6 +85,7 @@
                <children>
                   <JFXButton fx:id="updateBtn" onAction="#updateBtnOnAction" styleClass="btn, btn-success" text="Update" />
                   <JFXButton fx:id="deleteBtn" onAction="#deleteBtnOnAction" styleClass="btn, btn-danger" text="Delete" />
+                  <JFXButton fx:id="clearBtn" onAction="#clearBtnOnAction" styleClass="btn, btn-outline" text="Clear" />
                </children>
             </HBox>
          </children>

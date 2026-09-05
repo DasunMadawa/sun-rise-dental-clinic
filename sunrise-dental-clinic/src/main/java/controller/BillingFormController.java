@@ -15,8 +15,13 @@ import model.PaymentModel;
 import model.enums.AppointmentStatus;
 import model.enums.PaymentMethod;
 import model.enums.PaymentStatus;
+import report.ReportService;
+import util.mail.MailService;
 
+import java.io.File;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BillingFormController {
 
@@ -54,9 +59,13 @@ public class BillingFormController {
     private JFXButton issueBillBtn;
 
     @FXML
+    private JFXButton viewBillBtn;
+
+    @FXML
     private TextArea receiptArea;
 
     AppointmentModel selectedAppointment;
+    PaymentModel lastPayment;
 
     @FXML
     public void initialize() {
@@ -64,6 +73,7 @@ public class BillingFormController {
         discountTxt.setText("0");
         discountTxt.setDisable(!DashboardFormController.currentUser.canManagePrices());
         issueBillBtn.setVisible(false);
+        viewBillBtn.setVisible(false);
     }
 
     @FXML
@@ -84,15 +94,18 @@ public class BillingFormController {
             if (existing != null) {
                 new Alert(Alert.AlertType.ERROR, "This appointment has already been billed (" + existing.getPaymentID() + ").").show();
                 issueBillBtn.setVisible(false);
+                lastPayment = existing;
+                viewBillBtn.setVisible(true);
                 return;
             }
 
             patientNameLbl.setText(selectedAppointment.getPatient().getPatientName());
             dentistNameLbl.setText(selectedAppointment.getDentist().getDentistName());
-            treatmentLbl.setText(selectedAppointment.getTreatment().name() + " x " + selectedAppointment.getNoTooth());
+            treatmentLbl.setText(selectedAppointment.getTreatment().getName() + " x " + selectedAppointment.getNoTooth());
             consultationFeeLbl.setText(String.format("Rs. %,.2f", selectedAppointment.getConsultationFee()));
             treatmentCostLbl.setText(String.format("Rs. %,.2f", selectedAppointment.getTreatmentCost()));
             issueBillBtn.setVisible(true);
+            viewBillBtn.setVisible(false);
             recalculateTotal();
 
         } catch (Exception e) {
@@ -146,13 +159,69 @@ public class BillingFormController {
             selectedAppointment.setStatus(AppointmentStatus.COMPLETED);
             selectedAppointment.update();
 
+            lastPayment = payment;
             receiptArea.setText(buildReceipt(payment));
+            emailReceipt(payment);
+
             new Alert(Alert.AlertType.INFORMATION, "Bill " + payment.getPaymentID() + " issued. Total: Rs. " + String.format("%,.2f", payment.getTotalAmount()), ButtonType.OK).show();
 
             issueBillBtn.setVisible(false);
+            viewBillBtn.setVisible(true);
 
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Billing Failed !").show();
+            e.printStackTrace();
+        }
+
+    }
+
+    @FXML
+    void viewBillBtnOnAction(ActionEvent event) {
+        try {
+            ReportService.view(ReportService.fill("/reports/bill_report.jrxml", buildReportParams(lastPayment)));
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Could Not Open Report !").show();
+            e.printStackTrace();
+        }
+
+    }
+
+    private Map<String, Object> buildReportParams(PaymentModel payment) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("paymentId", payment.getPaymentID());
+        params.put("appointmentNo", payment.getAppointmentNo());
+        params.put("paymentDate", payment.getPaymentDate().toString());
+        params.put("patientId", selectedAppointment.getPatient().getPatientID());
+        params.put("patientName", selectedAppointment.getPatient().getPatientName());
+        params.put("dentistName", selectedAppointment.getDentist().getDentistName());
+        params.put("treatmentName", selectedAppointment.getTreatment().getName());
+        params.put("noTooth", payment.getNoToothBilled());
+        params.put("consultationFee", payment.getConsultationFee());
+        params.put("treatmentCost", payment.getTreatmentCost());
+        params.put("discount", payment.getDiscount());
+        params.put("total", payment.getTotalAmount());
+        params.put("paymentMethod", payment.getPaymentMethod().name());
+        return params;
+    }
+
+    private void emailReceipt(PaymentModel payment) {
+        String patientEmail = selectedAppointment.getPatient().getEmail();
+        if (patientEmail == null || patientEmail.isBlank()) {
+            return;
+        }
+
+        try {
+            File pdf = ReportService.exportToPdf(ReportService.fill("/reports/bill_report.jrxml", buildReportParams(payment)), payment.getPaymentID() + ".pdf");
+            MailService.sendWithAttachmentAsync(
+                    patientEmail,
+                    "Your Receipt - " + payment.getPaymentID(),
+                    "Dear " + selectedAppointment.getPatient().getPatientName() + ",\n\n" +
+                            "Thank you for visiting Sunrise Dental Clinic. Your receipt is attached.\n\n" +
+                            "Total Paid: Rs. " + String.format("%,.2f", payment.getTotalAmount()) + "\n\n" +
+                            "Sunrise Dental Clinic",
+                    pdf
+            );
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -166,7 +235,7 @@ public class BillingFormController {
         sb.append("Patient    : ").append(selectedAppointment.getPatient().getPatientName()).append("\n");
         sb.append("Dentist    : ").append(selectedAppointment.getDentist().getDentistName()).append("\n");
         sb.append("--------------------------------\n");
-        sb.append(selectedAppointment.getTreatment().name()).append(" x ").append(payment.getNoToothBilled())
+        sb.append(selectedAppointment.getTreatment().getName()).append(" x ").append(payment.getNoToothBilled())
                 .append(" @ Rs. ").append(String.format("%,.2f", payment.getUnitCostCharged())).append("\n");
         sb.append("Consultation Fee : Rs. ").append(String.format("%,.2f", payment.getConsultationFee())).append("\n");
         sb.append("Treatment Cost   : Rs. ").append(String.format("%,.2f", payment.getTreatmentCost())).append("\n");

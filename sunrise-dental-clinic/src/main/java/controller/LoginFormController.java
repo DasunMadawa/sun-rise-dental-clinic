@@ -76,4 +76,17 @@ public class LoginFormController {
         loginBtnOnAction(event);
     }
 
+    @FXML
+    void forgotPasswordBtnOnAction(ActionEvent event) {
+        try {
+            Stage primaryStage = (Stage) root.getScene().getWindow();
+            primaryStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/view/forgot_password_form.fxml"))));
+            primaryStage.setTitle("Sunrise Dental Clinic");
+            primaryStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }

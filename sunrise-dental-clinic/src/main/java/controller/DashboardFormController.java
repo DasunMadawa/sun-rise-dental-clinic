@@ -53,9 +53,12 @@ public class DashboardFormController {
         String fxml;
         switch (option) {
             case "Register Appointment": fxml = "registration_form.fxml"; break;
+            case "Appointments": fxml = "appointments_form.fxml"; break;
             case "Patients": fxml = "patients_form.fxml"; break;
             case "Billing": fxml = "billing_form.fxml"; break;
             case "Users": fxml = "user_form.fxml"; break;
+            case "Reports": fxml = "reports_form.fxml"; break;
+            case "Treatments": fxml = "treatment_types_form.fxml"; break;
             case "Dashboard":
             default: fxml = "menu_form.fxml";
         }

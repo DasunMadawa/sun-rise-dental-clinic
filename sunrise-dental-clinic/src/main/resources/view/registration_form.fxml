@@ -5,11 +5,13 @@
 <?import com.jfoenix.controls.JFXRadioButton?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import ui.TimePicker?>
 
 <ScrollPane fitToWidth="true" prefHeight="700.0" prefWidth="880.0" style="-fx-background-color: transparent;" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.RegistrationFormController">
    <content>
@@ -25,7 +27,7 @@
                   <Label styleClass="field-label" prefWidth="120.0" text="Appointment No" />
                   <JFXTextField fx:id="appointmentNoTxt" editable="false" prefWidth="150.0" />
                   <Label styleClass="field-label" prefWidth="100.0" text="Date" />
-                  <JFXTextField fx:id="appointmentDateTxt" prefWidth="150.0" styleClass="txt" />
+                  <DatePicker fx:id="appointmentDatePicker" prefWidth="150.0" />
                </children>
             </HBox>
 
@@ -61,7 +63,7 @@
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
                         <Label styleClass="field-label" prefWidth="120.0" text="Date of Birth" />
-                        <JFXTextField fx:id="dobTxt" prefWidth="150.0" promptText="yyyy-MM-dd" styleClass="txt" />
+                        <DatePicker fx:id="dobPicker" prefWidth="150.0" />
                         <Label styleClass="field-label" prefWidth="100.0" text="Gender" />
                         <fx:define>
                            <ToggleGroup fx:id="gender" />
@@ -69,6 +71,12 @@
                         <JFXRadioButton fx:id="maleRBtn" text="Male" toggleGroup="$gender" />
                         <JFXRadioButton fx:id="femaleRBtn" text="Female" toggleGroup="$gender" />
                         <JFXRadioButton fx:id="otherRBtn" text="Other" toggleGroup="$gender" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label styleClass="field-label" prefWidth="120.0" text="Email" />
+                        <JFXTextField fx:id="emailTxt" prefWidth="220.0" promptText="for appointment confirmation" styleClass="txt" />
                      </children>
                   </HBox>
                </children>
@@ -93,7 +101,7 @@
                         <Label styleClass="field-label" prefWidth="120.0" text="Tooth Count" />
                         <JFXTextField fx:id="toothCountTxt" prefWidth="80.0" styleClass="txt" />
                         <Label styleClass="field-label" prefWidth="100.0" text="Time" />
-                        <JFXTextField fx:id="appointmentTimeTxt" prefWidth="120.0" promptText="HH:mm" styleClass="txt" />
+                        <TimePicker fx:id="appointmentTimePicker" />
                      </children>
                   </HBox>
                </children>

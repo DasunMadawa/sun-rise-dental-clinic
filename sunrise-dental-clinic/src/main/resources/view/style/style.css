@@ -55,6 +55,28 @@
     -fx-font-size: 13;
 }
 
+/* ---------- Date picker ---------- */
+.date-picker {
+    -fx-background-color: -fx-surface;
+    -fx-background-radius: 6;
+    -fx-border-color: derive(-fx-text-muted, 60%);
+    -fx-border-radius: 6;
+}
+.date-picker:focused {
+    -fx-border-color: -fx-primary;
+}
+.date-picker .arrow-button {
+    -fx-background-color: -fx-primary;
+    -fx-background-radius: 0 5 5 0;
+}
+.date-picker .arrow-button .arrow {
+    -fx-background-color: white;
+}
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text;
+}
+
 /* ---------- Buttons ---------- */
 .btn {
     -fx-background-radius: 8;

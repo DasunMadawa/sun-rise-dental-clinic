@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="revenue_report" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+
+    <parameter name="year" class="java.lang.String"/>
+
+    <field name="month" class="java.lang.String"/>
+    <field name="revenue" class="java.lang.Double"/>
+
+    <variable name="totalRevenue" class="java.lang.Double" calculation="Sum">
+        <variableExpression><![CDATA[$F{revenue}]]></variableExpression>
+    </variable>
+
+    <title>
+        <band height="60">
+            <staticText>
+                <reportElement x="0" y="0" width="535" height="26"/>
+                <textElement textAlignment="Center">
+                    <font size="18" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Sunrise Dental Clinic - Revenue Report]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="28" width="535" height="16"/>
+                <textElement textAlignment="Center">
+                    <font size="10" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Year " + $P{year}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="46" width="535" height="1"/>
+            </line>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="300" height="20" forecolor="#FFFFFF" backcolor="#2F44B0" mode="Opaque"/>
+                <textElement><font size="10" isBold="true"/></textElement>
+                <text><![CDATA[Month]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="300" y="0" width="235" height="20" forecolor="#FFFFFF" backcolor="#2F44B0" mode="Opaque"/>
+                <textElement textAlignment="Right"><font size="10" isBold="true"/></textElement>
+                <text><![CDATA[Revenue]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="20" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="300" height="20"/>
+                <textElement><font size="10"/></textElement>
+                <textFieldExpression><![CDATA[$F{month}]]></textFieldExpression>
+            </textField>
+            <textField pattern="'Rs.' #,##0.00">
+                <reportElement x="300" y="0" width="235" height="20"/>
+                <textElement textAlignment="Right"><font size="10"/></textElement>
+                <textFieldExpression><![CDATA[$F{revenue}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <summary>
+        <band height="34">
+            <line>
+                <reportElement x="0" y="0" width="535" height="1"/>
+            </line>
+            <staticText>
+                <reportElement x="0" y="6" width="300" height="22"/>
+                <textElement><font size="12" isBold="true"/></textElement>
+                <text><![CDATA[TOTAL]]></text>
+            </staticText>
+            <textField pattern="'Rs.' #,##0.00">
+                <reportElement x="300" y="6" width="235" height="22"/>
+                <textElement textAlignment="Right"><font size="12" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$V{totalRevenue}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+</jasperReport>

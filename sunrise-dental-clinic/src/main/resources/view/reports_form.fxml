@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="700.0" prefWidth="880.0" spacing="18.0" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ReportsFormController">
+   <padding>
+      <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+   </padding>
+   <children>
+      <Label styleClass="page-title" text="Reports" />
+      <Label styleClass="muted" text="Each report opens in an interactive viewer with zoom, page navigation, print and export." />
+
+      <VBox spacing="10.0" styleClass="card">
+         <padding>
+            <Insets bottom="18.0" left="20.0" right="20.0" top="16.0" />
+         </padding>
+         <children>
+            <Label styleClass="section-title" text="Patient List" />
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <JFXButton fx:id="patientListBtn" onAction="#patientListBtnOnAction" styleClass="btn, btn-primary" text="Generate Patient List Report" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <VBox spacing="10.0" styleClass="card">
+         <padding>
+            <Insets bottom="18.0" left="20.0" right="20.0" top="16.0" />
+         </padding>
+         <children>
+            <Label styleClass="section-title" text="Appointment Schedule" />
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="70.0" text="Dentist" />
+                  <JFXComboBox fx:id="dentistComboBox" prefWidth="220.0" />
+                  <Label styleClass="field-label" prefWidth="50.0" text="Date" />
+                  <DatePicker fx:id="scheduleDatePicker" prefWidth="150.0" />
+                  <JFXButton fx:id="scheduleReportBtn" onAction="#scheduleReportBtnOnAction" styleClass="btn, btn-primary" text="Generate" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <VBox spacing="10.0" styleClass="card">
+         <padding>
+            <Insets bottom="18.0" left="20.0" right="20.0" top="16.0" />
+         </padding>
+         <children>
+            <Label styleClass="section-title" text="Revenue (current year)" />
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <JFXButton fx:id="revenueReportBtn" onAction="#revenueReportBtnOnAction" styleClass="btn, btn-primary" text="Generate Revenue Report" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>

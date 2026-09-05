@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.paint.Paint;
@@ -17,10 +18,13 @@ import model.AppointmentModel;
 import model.DentistModel;
 import model.PatientModel;
 import model.ReceptionistModel;
+import model.TreatmentTypeModel;
 import model.enums.AppointmentStatus;
 import model.enums.Gender;
-import model.enums.TreatmentType;
+import ui.TimePicker;
+import util.DatePickers;
 import util.Validations;
+import util.mail.MailService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -61,7 +65,10 @@ public class RegistrationFormController {
     private JFXTextField contactTxt;
 
     @FXML
-    private JFXTextField dobTxt;
+    private DatePicker dobPicker;
+
+    @FXML
+    private JFXTextField emailTxt;
 
     @FXML
     private JFXTextField appointmentNoTxt;
@@ -76,19 +83,22 @@ public class RegistrationFormController {
     private JFXTextField toothCountTxt;
 
     @FXML
-    private JFXTextField appointmentDateTxt;
+    private DatePicker appointmentDatePicker;
 
     @FXML
-    private JFXTextField appointmentTimeTxt;
+    private TimePicker appointmentTimePicker;
 
     @FXML
     private JFXButton registerBtn;
 
     Map<String, DentistModel> dentistsById = new HashMap<>();
+    Map<String, TreatmentTypeModel> treatmentsByCode = new HashMap<>();
     PatientModel foundPatient;
 
     @FXML
     public void initialize() {
+        DatePickers.applyFormat(dobPicker);
+        DatePickers.applyFormat(appointmentDatePicker);
         init();
         setEditable(false);
         setTextFieldValidations();
@@ -97,7 +107,8 @@ public class RegistrationFormController {
     private void init() {
         try {
             appointmentNoTxt.setText(AppointmentModel.generateNextId());
-            appointmentDateTxt.setText(LocalDate.now().toString());
+            patientIdTxt.setText(PatientModel.generateNextId());
+            appointmentDatePicker.setValue(LocalDate.now());
 
             ObservableList<String> dentistOptions = FXCollections.observableArrayList();
             List<DentistModel> dentists = DentistModel.getAllActive();
@@ -108,8 +119,9 @@ public class RegistrationFormController {
             dentistComboBox.setItems(dentistOptions);
 
             ObservableList<String> treatmentOptions = FXCollections.observableArrayList();
-            for (TreatmentType type : TreatmentType.values()) {
-                treatmentOptions.add(type.name());
+            for (TreatmentTypeModel type : TreatmentTypeModel.getAll()) {
+                treatmentsByCode.put(type.getCode(), type);
+                treatmentOptions.add(type.getCode() + " - " + type.getName());
             }
             treatmentComboBox.setItems(treatmentOptions);
 
@@ -128,8 +140,6 @@ public class RegistrationFormController {
         Validations.setFocus(nameTxt, Validations.namePattern);
         Validations.setFocus(addressTxt, Validations.namePattern);
         Validations.setFocus(contactTxt, Validations.mobilePattern);
-        Validations.setFocus(dobTxt, Validations.datePattern);
-        Validations.setFocus(appointmentTimeTxt, Validations.timePattern);
     }
 
     @FXML
@@ -147,7 +157,8 @@ public class RegistrationFormController {
                 nameTxt.setText(foundPatient.getPatientName());
                 addressTxt.setText(foundPatient.getAddress());
                 contactTxt.setText(foundPatient.getContactNo());
-                dobTxt.setText(foundPatient.getDateOfBirth().toString());
+                dobPicker.setValue(foundPatient.getDateOfBirth());
+                emailTxt.setText(foundPatient.getEmail());
 
                 switch (foundPatient.getGender()) {
                     case MALE: maleRBtn.setSelected(true); break;
@@ -173,7 +184,7 @@ public class RegistrationFormController {
         if (treatmentComboBox.getValue() == null) {
             return;
         }
-        TreatmentType type = TreatmentType.valueOf(treatmentComboBox.getValue());
+        TreatmentTypeModel type = treatmentsByCode.get(treatmentComboBox.getValue().split(" - ")[0]);
         if (type.isPerTooth()) {
             toothCountTxt.setDisable(false);
             toothCountTxt.clear();
@@ -192,18 +203,23 @@ public class RegistrationFormController {
                     (nameTxt.getFocusColor().equals(Paint.valueOf("red")) || nameTxt.getText().isEmpty()) ||
                     (addressTxt.getFocusColor().equals(Paint.valueOf("red")) || addressTxt.getText().isEmpty()) ||
                     (contactTxt.getFocusColor().equals(Paint.valueOf("red")) || contactTxt.getText().isEmpty()) ||
-                    (dobTxt.getFocusColor().equals(Paint.valueOf("red")) || dobTxt.getText().isEmpty()) ||
+                    dobPicker.getValue() == null || appointmentDatePicker.getValue() == null ||
                     genderRBtn == null || dentistComboBox.getValue() == null || treatmentComboBox.getValue() == null ||
-                    appointmentTimeTxt.getText().isEmpty() || toothCountTxt.getText().isEmpty()
+                    appointmentTimePicker.getValue() == null || toothCountTxt.getText().isEmpty()
             ) {
                 new Alert(Alert.AlertType.ERROR, "Enter valid Data").show();
+                return;
+            }
+
+            if (patientIdTxt.getText().isEmpty()) {
+                new Alert(Alert.AlertType.ERROR, "Click Search first to look up or generate a Patient Id.").show();
                 return;
             }
 
             if (foundPatient == null) {
                 PatientModel patient = new PatientModel(
                         patientIdTxt.getText(), nameTxt.getText(), addressTxt.getText(), contactTxt.getText(), nicTxt.getText(),
-                        LocalDate.parse(dobTxt.getText()), Gender.valueOf(genderRBtn.getText().toUpperCase()), LocalDate.now()
+                        dobPicker.getValue(), Gender.valueOf(genderRBtn.getText().toUpperCase()), LocalDate.now(), emailTxt.getText()
                 );
                 patient.save();
                 foundPatient = patient;
@@ -211,9 +227,9 @@ public class RegistrationFormController {
 
             String dentistId = dentistComboBox.getValue().split(" - ")[0];
             DentistModel dentist = dentistsById.get(dentistId);
-            TreatmentType treatment = TreatmentType.valueOf(treatmentComboBox.getValue());
-            LocalDate appointmentDate = LocalDate.parse(appointmentDateTxt.getText());
-            LocalTime appointmentTime = LocalTime.parse(appointmentTimeTxt.getText());
+            TreatmentTypeModel treatment = treatmentsByCode.get(treatmentComboBox.getValue().split(" - ")[0]);
+            LocalDate appointmentDate = appointmentDatePicker.getValue();
+            LocalTime appointmentTime = appointmentTimePicker.getValue();
             int noTooth = Integer.parseInt(toothCountTxt.getText());
 
             String bookedBy = DashboardFormController.currentUser instanceof ReceptionistModel
@@ -229,12 +245,27 @@ public class RegistrationFormController {
             for (AppointmentModel other : existing) {
                 if (appointment.overlaps(other)) {
                     new Alert(Alert.AlertType.ERROR, dentist.getDentistName() + " is booked " + other.getAppointmentTime() + "-" + other.getEndTime() + ". Next free slot: " + other.getEndTime()).show();
-                    appointmentTimeTxt.setText(other.getEndTime().toString());
+                    appointmentTimePicker.setValue(other.getEndTime());
                     return;
                 }
             }
 
             appointment.save();
+
+            MailService.sendAsync(
+                    foundPatient.getEmail(),
+                    "Appointment Confirmed - " + appointment.getAppointmentNo(),
+                    "Dear " + foundPatient.getPatientName() + ",\n\n" +
+                            "Your appointment has been confirmed.\n\n" +
+                            "Appointment No : " + appointment.getAppointmentNo() + "\n" +
+                            "Dentist        : " + dentist.getDentistName() + "\n" +
+                            "Treatment      : " + treatment.getName() + "\n" +
+                            "Date           : " + appointmentDate + "\n" +
+                            "Time           : " + appointmentTime + "\n\n" +
+                            "Please arrive 10 minutes early. Contact us if you need to reschedule.\n\n" +
+                            "Sunrise Dental Clinic"
+            );
+
             new Alert(Alert.AlertType.INFORMATION, "Appointment " + appointment.getAppointmentNo() + " confirmed: " + appointmentDate + " at " + appointmentTime, ButtonType.OK).show();
             clear();
             init();
@@ -252,9 +283,10 @@ public class RegistrationFormController {
         nameTxt.clear();
         addressTxt.clear();
         contactTxt.clear();
-        dobTxt.clear();
+        dobPicker.setValue(null);
+        emailTxt.clear();
         toothCountTxt.clear();
-        appointmentTimeTxt.clear();
+        appointmentTimePicker.setValue(null);
         foundPatient = null;
 
         RadioButton genderRBtn = (RadioButton) gender.getSelectedToggle();

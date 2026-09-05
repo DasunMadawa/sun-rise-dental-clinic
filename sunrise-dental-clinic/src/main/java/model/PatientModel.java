@@ -21,12 +21,13 @@ public class PatientModel {
     private LocalDate dateOfBirth;
     private Gender gender;
     private LocalDate registeredDate;
+    private String email;
 
     public PatientModel() {
 
     }
 
-    public PatientModel(String patientID, String patientName, String address, String contactNo, String nic, LocalDate dateOfBirth, Gender gender, LocalDate registeredDate) {
+    public PatientModel(String patientID, String patientName, String address, String contactNo, String nic, LocalDate dateOfBirth, Gender gender, LocalDate registeredDate, String email) {
         this.patientID = patientID;
         this.patientName = patientName;
         this.address = address;
@@ -35,6 +36,7 @@ public class PatientModel {
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
         this.registeredDate = registeredDate;
+        this.email = email;
     }
 
     public int getAge() {
@@ -135,6 +137,14 @@ public class PatientModel {
 
     public void setRegisteredDate(LocalDate registeredDate) {
         this.registeredDate = registeredDate;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }

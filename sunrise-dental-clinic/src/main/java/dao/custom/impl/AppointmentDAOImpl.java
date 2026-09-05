@@ -6,8 +6,8 @@ import dao.custom.UserDAO;
 import model.AppointmentModel;
 import model.DentistModel;
 import model.PatientModel;
+import model.TreatmentTypeModel;
 import model.enums.AppointmentStatus;
-import model.enums.TreatmentType;
 import model.UserModel;
 import util.DBConnection;
 
@@ -64,7 +64,7 @@ public class AppointmentDAOImpl implements AppointmentDAO {
                     "UPDATE appointment SET patient_id=?, dentist_id=?, booked_by_staff_id=?, treatment_code=?, no_tooth=?, appointment_date=?, appointment_time=?, status=?, remarks=? WHERE appointment_no=?"
             );
             statement.setString(1, appointment.getPatient().getPatientID());
-            statement.setString(2, appointment.getDentist().getUserID());
+            statement.setString(2, appointment.getDentist().getDentistID());
             statement.setString(3, appointment.getBookedByStaffID());
             statement.setString(4, appointment.getTreatment().getCode());
             statement.setInt(5, appointment.getNoTooth());
@@ -166,7 +166,7 @@ public class AppointmentDAOImpl implements AppointmentDAO {
     private void bindAppointment(PreparedStatement statement, AppointmentModel appointment) throws Exception {
         statement.setString(1, appointment.getAppointmentNo());
         statement.setString(2, appointment.getPatient().getPatientID());
-        statement.setString(3, appointment.getDentist().getUserID());
+        statement.setString(3, appointment.getDentist().getDentistID());
         statement.setString(4, appointment.getBookedByStaffID());
         statement.setString(5, appointment.getTreatment().getCode());
         statement.setInt(6, appointment.getNoTooth());
@@ -185,7 +185,7 @@ public class AppointmentDAOImpl implements AppointmentDAO {
                 patient,
                 (DentistModel) dentistUser,
                 resultSet.getString("booked_by_staff_id"),
-                TreatmentType.fromCode(resultSet.getString("treatment_code")),
+                TreatmentTypeModel.fromCodeOrDefault(resultSet.getString("treatment_code")),
                 resultSet.getInt("no_tooth"),
                 resultSet.getDate("appointment_date").toLocalDate(),
                 resultSet.getTime("appointment_time").toLocalTime(),

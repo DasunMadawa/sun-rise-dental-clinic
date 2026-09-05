@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXCheckBox?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="700.0" prefWidth="880.0" spacing="14.0" stylesheets="@style/style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TreatmentTypeFormController">
+   <padding>
+      <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+   </padding>
+   <children>
+      <Label styleClass="page-title" text="Treatment Types" />
+      <Label styleClass="muted" text="Click a row to edit it below, or fill in the form to add a new treatment type." />
+
+      <TableView fx:id="table" VBox.vgrow="ALWAYS">
+        <columns>
+          <TableColumn fx:id="codeCol" prefWidth="130.0" text="Code" />
+          <TableColumn fx:id="nameCol" prefWidth="180.0" text="Name" />
+          <TableColumn fx:id="unitCostCol" prefWidth="100.0" text="Unit Cost" />
+          <TableColumn fx:id="perToothCol" prefWidth="90.0" text="Per Tooth" />
+          <TableColumn fx:id="durationCol" prefWidth="110.0" text="Duration (min)" />
+        </columns>
+      </TableView>
+
+      <VBox spacing="12.0" styleClass="card">
+         <padding>
+            <Insets bottom="16.0" left="20.0" right="20.0" top="16.0" />
+         </padding>
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Code" />
+                  <JFXTextField fx:id="codeTxt" prefWidth="150.0" promptText="e.g. FILLING" styleClass="txt" />
+                  <Label styleClass="field-label" prefWidth="90.0" text="Name" />
+                  <JFXTextField fx:id="nameTxt" prefWidth="220.0" promptText="e.g. Filling" styleClass="txt" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Unit Cost" />
+                  <JFXTextField fx:id="unitCostTxt" prefWidth="120.0" promptText="Rs." styleClass="txt" />
+                  <Label styleClass="field-label" prefWidth="90.0" text="Duration" />
+                  <JFXTextField fx:id="durationTxt" prefWidth="100.0" promptText="minutes" styleClass="txt" />
+                  <JFXCheckBox fx:id="perToothCheckBox" text="Priced per tooth" />
+               </children>
+            </HBox>
+            <HBox spacing="10.0">
+               <children>
+                  <JFXButton fx:id="addBtn" onAction="#addBtnOnAction" styleClass="btn, btn-primary" text="Add" />
+                  <JFXButton fx:id="updateBtn" onAction="#updateBtnOnAction" styleClass="btn, btn-success" text="Update" />
+                  <JFXButton fx:id="deleteBtn" onAction="#deleteBtnOnAction" styleClass="btn, btn-danger" text="Delete" />
+                  <JFXButton fx:id="clearBtn" onAction="#clearBtnOnAction" styleClass="btn, btn-outline" text="Clear" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>

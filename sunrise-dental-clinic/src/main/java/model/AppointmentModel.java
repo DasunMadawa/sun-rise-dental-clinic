@@ -4,7 +4,6 @@ import dao.DAOFactory;
 import dao.custom.AppointmentDAO;
 import dao.custom.QueryDAO;
 import model.enums.AppointmentStatus;
-import model.enums.TreatmentType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -18,7 +17,7 @@ public class AppointmentModel {
     private PatientModel patient;
     private DentistModel dentist;
     private String bookedByStaffID;
-    private TreatmentType treatment;
+    private TreatmentTypeModel treatment;
     private int noTooth;
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
@@ -29,7 +28,7 @@ public class AppointmentModel {
 
     }
 
-    public AppointmentModel(String appointmentNo, PatientModel patient, DentistModel dentist, String bookedByStaffID, TreatmentType treatment, int noTooth, LocalDate appointmentDate, LocalTime appointmentTime, AppointmentStatus status, String remarks) {
+    public AppointmentModel(String appointmentNo, PatientModel patient, DentistModel dentist, String bookedByStaffID, TreatmentTypeModel treatment, int noTooth, LocalDate appointmentDate, LocalTime appointmentTime, AppointmentStatus status, String remarks) {
         this.appointmentNo = appointmentNo;
         this.patient = patient;
         this.dentist = dentist;
@@ -136,11 +135,11 @@ public class AppointmentModel {
         this.bookedByStaffID = bookedByStaffID;
     }
 
-    public TreatmentType getTreatment() {
+    public TreatmentTypeModel getTreatment() {
         return treatment;
     }
 
-    public void setTreatment(TreatmentType treatment) {
+    public void setTreatment(TreatmentTypeModel treatment) {
         this.treatment = treatment;
     }
 

@@ -14,7 +14,7 @@ public class Validations {
     public static final Pattern nicPattern = Pattern.compile("^([0-9]{9}[vVxX]|[0-9]{12})$");
     public static final Pattern timePattern = Pattern.compile("^([01]\\d|2[0-3]):([0-5]\\d)$");
 
-    public static final Pattern patientPattern = Pattern.compile("^(PAT)[0-9]{4}$");
+    public static final Pattern patientPattern = Pattern.compile("^(PT)[0-9]{3}$");
     public static final Pattern dentistPattern = Pattern.compile("^(DEN)[0-9]{3}$");
     public static final Pattern staffPattern = Pattern.compile("^(STF)[0-9]{3}$");
     public static final Pattern appointmentPattern = Pattern.compile("^(APT)[0-9]{4}$");

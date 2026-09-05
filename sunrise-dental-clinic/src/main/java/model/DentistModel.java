@@ -19,8 +19,8 @@ public class DentistModel extends UserModel {
 
     }
 
-    public DentistModel(String userID, String username, String passwordHash, boolean isActive, LocalDateTime lastLogin, String dentistID, String dentistName, String specialization, String contactNo, double consultationFee, List<String> availableDays) {
-        super(userID, username, passwordHash, UserRole.DENTIST, isActive, lastLogin);
+    public DentistModel(String userID, String username, String passwordHash, boolean isActive, LocalDateTime lastLogin, String email, String dentistID, String dentistName, String specialization, String contactNo, double consultationFee, List<String> availableDays) {
+        super(userID, username, passwordHash, UserRole.DENTIST, isActive, lastLogin, email);
         this.dentistID = dentistID;
         this.dentistName = dentistName;
         this.specialization = specialization;
@@ -57,7 +57,7 @@ public class DentistModel extends UserModel {
 
     @Override
     public List<String> getMenuOptions() {
-        return Arrays.asList("Dashboard", "Patients");
+        return Arrays.asList("Dashboard", "Appointments", "Patients");
     }
 
     public String getDentistID() {

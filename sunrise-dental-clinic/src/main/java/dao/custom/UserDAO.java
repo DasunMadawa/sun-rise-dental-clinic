@@ -11,5 +11,6 @@ public interface UserDAO extends CrudDAO<UserModel> {
     public String generateNextUserId() throws Exception;
     public String generateNextStaffId() throws Exception;
     public String generateNextDentistId() throws Exception;
+    public boolean updatePassword(String userId, String passwordHash) throws Exception;
 
 }

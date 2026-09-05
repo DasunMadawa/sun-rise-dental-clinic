@@ -19,7 +19,7 @@ import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
     private static final String SELECT_JOIN =
-            "SELECT u.*, s.staff_id, s.staff_name, s.designation, s.contact_no AS staff_contact, s.email, " +
+            "SELECT u.*, s.staff_id, s.staff_name, s.designation, s.contact_no AS staff_contact, s.email AS staff_email, " +
                     "d.dentist_id, d.dentist_name, d.specialization, d.contact_no AS dentist_contact, d.consultation_fee, d.available_days " +
                     "FROM user u LEFT JOIN staff s ON s.user_id = u.user_id LEFT JOIN dentist d ON d.user_id = u.user_id";
 
@@ -30,7 +30,7 @@ public class UserDAOImpl implements UserDAO {
             connection.setAutoCommit(false);
 
             PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO user (user_id, username, password_hash, role, is_active, last_login) VALUES (?, ?, ?, ?, ?, ?)"
+                    "INSERT INTO user (user_id, username, password_hash, role, is_active, last_login, email) VALUES (?, ?, ?, ?, ?, ?, ?)"
             );
             statement.setString(1, user.getUserID());
             statement.setString(2, user.getUsername());
@@ -38,6 +38,7 @@ public class UserDAOImpl implements UserDAO {
             statement.setString(4, user.getRole().name());
             statement.setBoolean(5, user.isActive());
             statement.setTimestamp(6, user.getLastLogin() == null ? null : Timestamp.valueOf(user.getLastLogin()));
+            statement.setString(7, user.getEmail());
             statement.executeUpdate();
 
             if (user instanceof ReceptionistModel) {
@@ -50,7 +51,7 @@ public class UserDAOImpl implements UserDAO {
                 staffStatement.setString(3, receptionist.getUsername());
                 staffStatement.setString(4, receptionist.getDesignation());
                 staffStatement.setString(5, receptionist.getContactNo());
-                staffStatement.setString(6, receptionist.getEmail());
+                staffStatement.setString(6, receptionist.getStaffEmail());
                 staffStatement.executeUpdate();
             } else if (user instanceof DentistModel) {
                 DentistModel dentist = (DentistModel) user;
@@ -82,9 +83,11 @@ public class UserDAOImpl implements UserDAO {
     public UserModel search(String id) throws Exception {
         Connection connection = DBConnection.getInstance().getConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement(SELECT_JOIN + " WHERE u.user_id=? OR u.username=?");
+            PreparedStatement statement = connection.prepareStatement(SELECT_JOIN + " WHERE u.user_id=? OR u.username=? OR u.email=? OR d.dentist_id=?");
             statement.setString(1, id);
             statement.setString(2, id);
+            statement.setString(3, id);
+            statement.setString(4, id);
 
             ResultSet resultSet = statement.executeQuery();
             return resultSet.next() ? map(resultSet) : null;
@@ -101,11 +104,12 @@ public class UserDAOImpl implements UserDAO {
             connection.setAutoCommit(false);
 
             PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE user SET username=?, is_active=? WHERE user_id=?"
+                    "UPDATE user SET username=?, is_active=?, email=? WHERE user_id=?"
             );
             statement.setString(1, user.getUsername());
             statement.setBoolean(2, user.isActive());
-            statement.setString(3, user.getUserID());
+            statement.setString(3, user.getEmail());
+            statement.setString(4, user.getUserID());
             statement.executeUpdate();
 
             if (user instanceof ReceptionistModel) {
@@ -116,7 +120,7 @@ public class UserDAOImpl implements UserDAO {
                 staffStatement.setString(1, receptionist.getUsername());
                 staffStatement.setString(2, receptionist.getDesignation());
                 staffStatement.setString(3, receptionist.getContactNo());
-                staffStatement.setString(4, receptionist.getEmail());
+                staffStatement.setString(4, receptionist.getStaffEmail());
                 staffStatement.setString(5, receptionist.getUserID());
                 staffStatement.executeUpdate();
             } else if (user instanceof DentistModel) {
@@ -229,6 +233,21 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
+    public boolean updatePassword(String userId, String passwordHash) throws Exception {
+        Connection connection = DBConnection.getInstance().getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement("UPDATE user SET password_hash=? WHERE user_id=?");
+            statement.setString(1, passwordHash);
+            statement.setString(2, userId);
+
+            return statement.executeUpdate() > 0;
+        } catch (Exception e) {
+            throw e;
+        }
+
+    }
+
+    @Override
     public String generateNextDentistId() throws Exception {
         Connection connection = DBConnection.getInstance().getConnection();
         Statement statement = connection.createStatement();
@@ -248,11 +267,12 @@ public class UserDAOImpl implements UserDAO {
         String userId = resultSet.getString("user_id");
         String username = resultSet.getString("username");
         String passwordHash = resultSet.getString("password_hash");
+        String email = resultSet.getString("email");
 
         switch (role) {
             case DENTIST:
                 return new DentistModel(
-                        userId, username, passwordHash, isActive, lastLoginTs == null ? null : lastLoginTs.toLocalDateTime(),
+                        userId, username, passwordHash, isActive, lastLoginTs == null ? null : lastLoginTs.toLocalDateTime(), email,
                         resultSet.getString("dentist_id"),
                         resultSet.getString("dentist_name"),
                         resultSet.getString("specialization"),
@@ -261,15 +281,15 @@ public class UserDAOImpl implements UserDAO {
                         Arrays.asList(resultSet.getString("available_days").split(","))
                 );
             case MANAGER:
-                return new ManagerModel(userId, username, passwordHash, isActive, lastLoginTs == null ? null : lastLoginTs.toLocalDateTime());
+                return new ManagerModel(userId, username, passwordHash, isActive, lastLoginTs == null ? null : lastLoginTs.toLocalDateTime(), email);
             case RECEPTIONIST:
             default:
                 return new ReceptionistModel(
-                        userId, username, passwordHash, isActive, lastLoginTs == null ? null : lastLoginTs.toLocalDateTime(),
+                        userId, username, passwordHash, isActive, lastLoginTs == null ? null : lastLoginTs.toLocalDateTime(), email,
                         resultSet.getString("staff_id"),
                         resultSet.getString("designation"),
                         resultSet.getString("staff_contact"),
-                        resultSet.getString("email")
+                        resultSet.getString("staff_email")
                 );
         }
     }

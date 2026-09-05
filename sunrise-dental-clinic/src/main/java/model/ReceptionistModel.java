@@ -10,18 +10,18 @@ public class ReceptionistModel extends UserModel {
     private String staffID;
     private String designation;
     private String contactNo;
-    private String email;
+    private String staffEmail;
 
     public ReceptionistModel() {
 
     }
 
-    public ReceptionistModel(String userID, String username, String passwordHash, boolean isActive, LocalDateTime lastLogin, String staffID, String designation, String contactNo, String email) {
-        super(userID, username, passwordHash, UserRole.RECEPTIONIST, isActive, lastLogin);
+    public ReceptionistModel(String userID, String username, String passwordHash, boolean isActive, LocalDateTime lastLogin, String email, String staffID, String designation, String contactNo, String staffEmail) {
+        super(userID, username, passwordHash, UserRole.RECEPTIONIST, isActive, lastLogin, email);
         this.staffID = staffID;
         this.designation = designation;
         this.contactNo = contactNo;
-        this.email = email;
+        this.staffEmail = staffEmail;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ReceptionistModel extends UserModel {
 
     @Override
     public List<String> getMenuOptions() {
-        return Arrays.asList("Dashboard", "Register Appointment", "Patients", "Billing");
+        return Arrays.asList("Dashboard", "Register Appointment", "Appointments", "Patients", "Billing", "Reports");
     }
 
     public static String generateNextStaffId() throws Exception {
@@ -67,12 +67,12 @@ public class ReceptionistModel extends UserModel {
         this.contactNo = contactNo;
     }
 
-    public String getEmail() {
-        return email;
+    public String getStaffEmail() {
+        return staffEmail;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setStaffEmail(String staffEmail) {
+        this.staffEmail = staffEmail;
     }
 
 }

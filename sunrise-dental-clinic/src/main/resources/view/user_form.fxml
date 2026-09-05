@@ -56,6 +56,13 @@
 
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
+                  <Label styleClass="field-label" prefWidth="90.0" text="Login Email" />
+                  <JFXTextField fx:id="loginEmailTxt" prefWidth="220.0" promptText="for OTP / forgot password" styleClass="txt" />
+               </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
                   <Label styleClass="field-label" prefWidth="90.0" text="Role" />
                   <fx:define>
                      <ToggleGroup fx:id="role" />
@@ -117,6 +124,7 @@
                   <JFXButton fx:id="addBtn" onAction="#addBtnOnAction" styleClass="btn, btn-primary" text="Add" />
                   <JFXButton fx:id="updateBtn" onAction="#updateBtnOnAction" styleClass="btn, btn-success" text="Update" />
                   <JFXButton fx:id="deleteBtn" onAction="#deleteBtnOnAction" styleClass="btn, btn-danger" text="Delete" />
+                  <JFXButton fx:id="clearBtn" onAction="#clearBtnOnAction" styleClass="btn, btn-outline" text="Clear" />
                </children>
             </HBox>
          </children>

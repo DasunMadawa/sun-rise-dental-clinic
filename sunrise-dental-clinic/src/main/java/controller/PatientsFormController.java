@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -18,9 +19,9 @@ import model.AppointmentModel;
 import model.PatientModel;
 import model.enums.Gender;
 import model.tm.PatientTM;
+import util.DatePickers;
 import util.Validations;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,7 +88,10 @@ public class PatientsFormController {
     private JFXTextField contactTxt;
 
     @FXML
-    private JFXTextField dobTxt;
+    private DatePicker dobPicker;
+
+    @FXML
+    private JFXTextField emailTxt;
 
     @FXML
     private JFXButton searchBtn;
@@ -98,10 +102,14 @@ public class PatientsFormController {
     @FXML
     private JFXButton deleteBtn;
 
+    @FXML
+    private JFXButton clearBtn;
+
     PatientModel selectedPatient;
 
     @FXML
     public void initialize() {
+        DatePickers.applyFormat(dobPicker);
         setCellValueFactory();
         loadTableValues();
         setBtnsVisible(false);
@@ -119,7 +127,6 @@ public class PatientsFormController {
         Validations.setFocus(nameTxt, Validations.namePattern);
         Validations.setFocus(addressTxt, Validations.namePattern);
         Validations.setFocus(contactTxt, Validations.mobilePattern);
-        Validations.setFocus(dobTxt, Validations.datePattern);
         Validations.setFocus(searchTxt, Validations.patientPattern);
     }
 
@@ -146,7 +153,7 @@ public class PatientsFormController {
                         patient.getPatientID(), patient.getPatientName(), patient.getContactNo(), patient.getAge(), patient.getGender().name(),
                         latest == null ? "" : latest.getAppointmentNo(),
                         latest == null ? "" : latest.getDentist().getDentistName(),
-                        latest == null ? "" : latest.getTreatment().name(),
+                        latest == null ? "" : latest.getTreatment().getName(),
                         latest == null ? null : latest.getAppointmentDate(),
                         latest == null ? "" : latest.getStatus().name()
                 ));
@@ -161,7 +168,7 @@ public class PatientsFormController {
     @FXML
     void searchBtnOnAction(ActionEvent event) {
         if (searchTxt.getText().isEmpty()) {
-            new Alert(Alert.AlertType.ERROR, "Enter valid Patient Id like 'PAT0001'", ButtonType.OK).show();
+            new Alert(Alert.AlertType.ERROR, "Enter valid Patient Id like 'PT001'", ButtonType.OK).show();
             return;
         }
         loadPatient(searchTxt.getText());
@@ -180,7 +187,8 @@ public class PatientsFormController {
             nameTxt.setText(selectedPatient.getPatientName());
             addressTxt.setText(selectedPatient.getAddress());
             contactTxt.setText(selectedPatient.getContactNo());
-            dobTxt.setText(selectedPatient.getDateOfBirth().toString());
+            dobPicker.setValue(selectedPatient.getDateOfBirth());
+            emailTxt.setText(selectedPatient.getEmail());
 
             switch (selectedPatient.getGender()) {
                 case MALE: maleRBtn.setSelected(true); break;
@@ -204,7 +212,7 @@ public class PatientsFormController {
             if ((nameTxt.getFocusColor().equals(javafx.scene.paint.Paint.valueOf("red")) || nameTxt.getText().isEmpty()) ||
                     (addressTxt.getFocusColor().equals(javafx.scene.paint.Paint.valueOf("red")) || addressTxt.getText().isEmpty()) ||
                     (contactTxt.getFocusColor().equals(javafx.scene.paint.Paint.valueOf("red")) || contactTxt.getText().isEmpty()) ||
-                    (dobTxt.getFocusColor().equals(javafx.scene.paint.Paint.valueOf("red")) || dobTxt.getText().isEmpty()) ||
+                    dobPicker.getValue() == null ||
                     genderRBtn == null
             ) {
                 new Alert(Alert.AlertType.ERROR, "Enter valid Data").show();
@@ -214,8 +222,9 @@ public class PatientsFormController {
             selectedPatient.setPatientName(nameTxt.getText());
             selectedPatient.setAddress(addressTxt.getText());
             selectedPatient.setContactNo(contactTxt.getText());
-            selectedPatient.setDateOfBirth(LocalDate.parse(dobTxt.getText()));
+            selectedPatient.setDateOfBirth(dobPicker.getValue());
             selectedPatient.setGender(Gender.valueOf(genderRBtn.getText().toUpperCase()));
+            selectedPatient.setEmail(emailTxt.getText());
 
             selectedPatient.update();
             new Alert(Alert.AlertType.INFORMATION, "Patient Updated !").show();
@@ -254,12 +263,21 @@ public class PatientsFormController {
         searchBtnOnAction(actionEvent);
     }
 
+    @FXML
+    void clearBtnOnAction(ActionEvent event) {
+        selectedPatient = null;
+        table.getSelectionModel().clearSelection();
+        table.getFocusModel().focus(-1);
+        clearTxtFields();
+    }
+
     private void clearTxtFields() {
         patientIdTxt.clear();
         nameTxt.clear();
         addressTxt.clear();
         contactTxt.clear();
-        dobTxt.clear();
+        dobPicker.setValue(null);
+        emailTxt.clear();
         searchTxt.clear();
 
         setBtnsVisible(false);

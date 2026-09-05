@@ -12,8 +12,8 @@ public class ManagerModel extends UserModel {
 
     }
 
-    public ManagerModel(String userID, String username, String passwordHash, boolean isActive, LocalDateTime lastLogin) {
-        super(userID, username, passwordHash, UserRole.MANAGER, isActive, lastLogin);
+    public ManagerModel(String userID, String username, String passwordHash, boolean isActive, LocalDateTime lastLogin, String email) {
+        super(userID, username, passwordHash, UserRole.MANAGER, isActive, lastLogin, email);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class ManagerModel extends UserModel {
 
     @Override
     public List<String> getMenuOptions() {
-        return Arrays.asList("Dashboard", "Register Appointment", "Patients", "Billing", "Users");
+        return Arrays.asList("Dashboard", "Register Appointment", "Appointments", "Patients", "Billing", "Users", "Reports", "Treatments");
     }
 
 }

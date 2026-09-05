@@ -29,6 +29,7 @@
                   <Insets top="6.0" />
                </VBox.margin>
             </JFXButton>
+            <JFXButton fx:id="forgotPasswordBtn" onAction="#forgotPasswordBtnOnAction" styleClass="btn, btn-outline" text="Forgot password?" />
          </children>
       </VBox>
    </children>

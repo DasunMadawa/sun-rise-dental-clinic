@@ -64,6 +64,7 @@
                   <Label styleClass="field-label" prefWidth="120.0" text="Payment Method" />
                   <JFXComboBox fx:id="paymentMethodComboBox" prefWidth="150.0" />
                   <JFXButton fx:id="issueBillBtn" onAction="#issueBillBtnOnAction" styleClass="btn, btn-success" text="Issue Bill" />
+                  <JFXButton fx:id="viewBillBtn" onAction="#viewBillBtnOnAction" styleClass="btn, btn-outline" text="View / Print Bill" />
                </children>
             </HBox>
          </children>

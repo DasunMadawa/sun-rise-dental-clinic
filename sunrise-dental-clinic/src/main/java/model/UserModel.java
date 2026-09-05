@@ -17,22 +17,28 @@ public abstract class UserModel {
     protected UserRole role;
     protected boolean isActive;
     protected LocalDateTime lastLogin;
+    protected String email;
 
     public UserModel() {
 
     }
 
-    public UserModel(String userID, String username, String passwordHash, UserRole role, boolean isActive, LocalDateTime lastLogin) {
+    public UserModel(String userID, String username, String passwordHash, UserRole role, boolean isActive, LocalDateTime lastLogin, String email) {
         this.userID = userID;
         this.username = username;
         this.passwordHash = passwordHash;
         this.role = role;
         this.isActive = isActive;
         this.lastLogin = lastLogin;
+        this.email = email;
     }
 
     public boolean checkPassword(String plain) {
         return passwordHash != null && passwordHash.equals(PasswordUtil.hash(plain));
+    }
+
+    public static boolean resetPassword(String userId, String newPasswordHash) throws Exception {
+        return userDAO.updatePassword(userId, newPasswordHash);
     }
 
     public static UserModel search(String idOrUsername) throws Exception {
@@ -111,6 +117,14 @@ public abstract class UserModel {
 
     public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }
